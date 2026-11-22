@@ -1,0 +1,1322 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href="data:," />
+    <title>Financial Disclosure Intelligence — From Model Disagreement to Disclosure Intelligence | ADAM</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=Public+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+    <style>
+      :root{
+        --bg:#f5efe1;
+        --bg-soft:#efe6d0;
+        --surface:#fffdf6;
+        --surface-2:#fdf6e3;
+        --ink:#1c2340;
+        --muted:#5b6378;
+        --line:#ddd2b8;
+        --navy:#1a2150;
+        --navy-deep:#12173c;
+        --gold:#d98e04;
+        --gold-bright:#f2b33d;
+        --gold-soft:#fbeecd;
+        --teal:#0d9488;
+        --teal-soft:#d7f2ec;
+        --red:#cf3f3f;
+        --red-soft:#fbe3e1;
+        --green:#1d9e62;
+        --green-soft:#dcf4e5;
+        --shadow:0 10px 30px rgba(28,35,64,.10);
+        --radius:18px;
+      }
+      @media (prefers-color-scheme: dark){
+        :root{
+          --bg:#0e1230;
+          --bg-soft:#12173c;
+          --surface:#181f4a;
+          --surface-2:#1d2657;
+          --ink:#f4edd9;
+          --muted:#a9b0cc;
+          --line:#2e3768;
+          --navy:#232c66;
+          --navy-deep:#0e1230;
+          --gold:#f2b33d;
+          --gold-bright:#ffc95e;
+          --gold-soft:#33305e;
+          --teal:#2dd4bf;
+          --teal-soft:#173f42;
+          --red:#f08080;
+          --red-soft:#4a2438;
+          --green:#4ade80;
+          --green-soft:#1d4038;
+          --shadow:0 10px 30px rgba(0,0,0,.35);
+        }
+      }
+      *{box-sizing:border-box}
+      html{scroll-behavior:smooth}
+      body{
+        margin:0;background:var(--bg);color:var(--ink);
+        font-family:"Public Sans",system-ui,sans-serif;
+        font-size:16.5px;line-height:1.6;
+        -webkit-font-smoothing:antialiased;
+      }
+      h1,h2,h3,.display{font-family:"Bricolage Grotesque","Public Sans",sans-serif;line-height:1.12;margin:0}
+      .mono{font-family:"Space Mono",monospace}
+      .wrap{max-width:1140px;margin:0 auto;padding:0 20px}
+      a{color:var(--teal)}
+      button{font:inherit;cursor:pointer}
+      :focus-visible{outline:3px solid var(--gold-bright);outline-offset:2px;border-radius:6px}
+
+      /* ---------- HUD ---------- */
+      .hud{
+        position:sticky;top:0;z-index:50;
+        background:color-mix(in srgb, var(--bg) 88%, transparent);
+        backdrop-filter:blur(10px);
+        border-bottom:2px solid var(--line);
+      }
+      .hud-inner{display:flex;align-items:center;gap:14px;padding:10px 0;flex-wrap:wrap}
+      .hud-brand{display:flex;align-items:center;gap:10px;font-family:"Bricolage Grotesque",sans-serif;font-weight:800;font-size:1.02rem;letter-spacing:.01em}
+      .hud-brand .crest{
+        width:34px;height:34px;border-radius:10px;background:var(--navy);color:var(--gold-bright);
+        display:grid;place-items:center;flex:none;
+      }
+      .hud-brand small{display:block;font-family:"Space Mono",monospace;font-weight:400;font-size:.62rem;letter-spacing:.14em;color:var(--muted);text-transform:uppercase}
+      .hud-stats{margin-left:auto;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+      .chip{
+        display:inline-flex;align-items:center;gap:7px;
+        background:var(--surface);border:2px solid var(--line);border-radius:999px;
+        padding:5px 13px;font-family:"Space Mono",monospace;font-size:.82rem;font-weight:700;
+      }
+      .chip svg{flex:none}
+      .chip.xp{border-color:var(--gold);background:var(--gold-soft)}
+      .levelbar{width:110px;height:9px;border-radius:99px;background:var(--line);overflow:hidden}
+      .levelbar i{display:block;height:100%;background:var(--gold-bright);border-radius:99px;transition:width .6s ease}
+
+      /* ---------- Hero ---------- */
+      .hero{padding:44px 0 10px}
+      .hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:34px;align-items:center}
+      .kicker{
+        display:inline-flex;align-items:center;gap:8px;
+        font-family:"Space Mono",monospace;font-size:.72rem;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
+        background:var(--navy);color:var(--gold-bright);border-radius:999px;padding:6px 14px;
+      }
+      .hero h1{font-size:clamp(2.4rem,5.4vw,3.9rem);font-weight:800;margin:16px 0 6px}
+      .hero h1 .quest{color:var(--gold)}
+      .hero .sub{font-size:1.13rem;color:var(--muted);max-width:34rem;margin:10px 0 0}
+      .hero .sub strong{color:var(--ink)}
+      .hero-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+      .btn{
+        display:inline-flex;align-items:center;gap:9px;border:none;border-radius:13px;
+        padding:13px 22px;font-weight:700;font-size:1rem;text-decoration:none;
+        transition:transform .15s ease, box-shadow .15s ease;
+      }
+      .btn:active{transform:translateY(1px)}
+      .btn-gold{background:var(--gold-bright);color:#231a02;box-shadow:0 6px 0 #a86e06}
+      .btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 0 #a86e06}
+      .btn-ghost{background:var(--surface);color:var(--ink);border:2px solid var(--line);box-shadow:0 4px 0 var(--line)}
+      .btn-ghost:hover{transform:translateY(-2px)}
+      .hero-facts{display:flex;gap:18px;flex-wrap:wrap;margin-top:22px;font-size:.9rem;color:var(--muted)}
+      .hero-facts span{display:inline-flex;gap:7px;align-items:center}
+      .hero-art{
+        border-radius:22px;overflow:hidden;border:3px solid var(--navy);
+        box-shadow:var(--shadow);line-height:0;background:var(--navy-deep);
+      }
+      .hero-art img{width:100%;height:auto;display:block}
+      .hero-art figcaption{
+        line-height:1.45;background:var(--navy);color:#e9e2cd;font-size:.82rem;
+        padding:10px 16px;font-family:"Space Mono",monospace;letter-spacing:.03em;
+      }
+
+      /* ---------- How it plays ---------- */
+      .howto{padding:38px 0 6px}
+      .howto-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:18px}
+      .how-card{
+        background:var(--surface);border:2px solid var(--line);border-radius:var(--radius);
+        padding:18px;position:relative;
+      }
+      .how-card .stepnum{
+        font-family:"Space Mono",monospace;font-weight:700;font-size:.72rem;letter-spacing:.12em;
+        color:var(--gold);text-transform:uppercase;
+      }
+      .how-card h3{font-size:1.06rem;margin:8px 0 5px}
+      .how-card p{margin:0;color:var(--muted);font-size:.93rem}
+      .how-card .ic{
+        width:42px;height:42px;border-radius:12px;display:grid;place-items:center;margin-bottom:10px;
+        background:var(--gold-soft);color:var(--gold);
+      }
+      .how-card:nth-child(2) .ic{background:var(--teal-soft);color:var(--teal)}
+      .how-card:nth-child(3) .ic{background:var(--gold-soft);color:var(--gold)}
+      .how-card:nth-child(4) .ic{background:var(--red-soft);color:var(--red)}
+
+      .section-head{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-top:44px}
+      .section-head h2{font-size:clamp(1.6rem,3.4vw,2.2rem);font-weight:800}
+      .section-head p{color:var(--muted);margin:0}
+
+      /* ---------- Episode trail ---------- */
+      .trail{margin-top:22px;display:flex;flex-direction:column;gap:0}
+      .ep{
+        display:grid;grid-template-columns:86px 1fr auto;gap:18px;align-items:center;
+        background:var(--surface);border:2px solid var(--line);border-radius:var(--radius);
+        padding:20px 22px;position:relative;
+      }
+      .ep + .ep{margin-top:14px}
+      .ep::before{
+        content:"";position:absolute;left:64px;top:-16px;height:16px;width:0;
+        border-left:3px dashed var(--line);
+      }
+      .ep:first-child::before{display:none}
+      .boss + .ep::before{display:none}
+      .ep-medal{
+        width:64px;height:64px;border-radius:50%;flex:none;
+        display:grid;place-items:center;text-align:center;
+        background:var(--navy);color:var(--gold-bright);
+        font-family:"Bricolage Grotesque",sans-serif;font-weight:800;
+        border:3px solid var(--gold);
+      }
+      .ep-medal small{display:block;font-family:"Space Mono",monospace;font-weight:400;font-size:.55rem;letter-spacing:.14em;color:#cfd4ea}
+      .ep-medal .n{font-size:1.45rem;line-height:1}
+      .ep.locked .ep-medal{background:var(--bg-soft);color:var(--muted);border-color:var(--line)}
+      .ep.cleared .ep-medal{background:var(--teal);border-color:var(--teal);color:#fff}
+      .ep-body h3{font-size:1.22rem;font-weight:700}
+      .ep-body .chap{font-family:"Space Mono",monospace;font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);font-weight:700}
+      .ep-body p{margin:5px 0 0;color:var(--muted);font-size:.95rem;max-width:44rem}
+      .ep-tags{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+      .tag{
+        font-size:.74rem;font-weight:600;background:var(--bg-soft);border:1.5px solid var(--line);
+        border-radius:999px;padding:3px 10px;color:var(--muted);
+      }
+      .ep-side{display:flex;flex-direction:column;align-items:flex-end;gap:9px}
+      .ep-xp{font-family:"Space Mono",monospace;font-weight:700;font-size:.85rem;color:var(--gold)}
+      .stars{font-size:1rem;letter-spacing:2px;color:var(--line)}
+      .stars .on{color:var(--gold-bright)}
+      .btn-play{
+        background:var(--navy);color:#fff;border:none;border-radius:11px;padding:11px 20px;
+        font-weight:700;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 0 var(--navy-deep);
+      }
+      .btn-play:hover{transform:translateY(-2px)}
+      .btn-play:disabled{background:var(--bg-soft);color:var(--muted);box-shadow:none;cursor:not-allowed;transform:none}
+      .ep.locked{opacity:.75}
+      .status-pill{
+        font-family:"Space Mono",monospace;font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+        border-radius:999px;padding:4px 11px;
+      }
+      .status-pill.now{background:var(--gold-soft);color:var(--gold);border:1.5px solid var(--gold)}
+      .status-pill.done{background:var(--teal-soft);color:var(--teal);border:1.5px solid var(--teal)}
+      .status-pill.lock{background:var(--bg-soft);color:var(--muted);border:1.5px solid var(--line)}
+
+      /* boss cards */
+      .boss{
+        margin-top:14px;border-radius:var(--radius);padding:20px 22px;
+        background:var(--navy);color:#f2ead8;border:3px solid var(--gold);
+        display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;
+      }
+      .boss .bic{
+        width:58px;height:58px;border-radius:16px;background:var(--gold-bright);color:#231a02;
+        display:grid;place-items:center;flex:none;
+      }
+      .boss h3{font-size:1.25rem;color:#fff}
+      .boss .chap{font-family:"Space Mono",monospace;font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold-bright);font-weight:700}
+      .boss p{margin:4px 0 0;color:#c9cfe6;font-size:.94rem;max-width:40rem}
+      .boss .pts{font-family:"Space Mono",monospace;font-weight:700;text-align:right;color:var(--gold-bright);font-size:1.05rem;white-space:nowrap}
+      .boss .pts small{display:block;color:#c9cfe6;font-weight:400;font-size:.68rem;letter-spacing:.08em}
+
+      /* ---------- Player ---------- */
+      #player{display:none;padding:34px 0 60px}
+      #player.open{display:block}
+      .player-shell{max-width:820px;margin:0 auto}
+      .player-top{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+      .player-top .chap{font-family:"Space Mono",monospace;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);font-weight:700}
+      .player-top h2{font-size:clamp(1.5rem,3.4vw,2.1rem);font-weight:800}
+      .btn-exit{
+        margin-left:auto;background:var(--surface);border:2px solid var(--line);color:var(--ink);
+        border-radius:11px;padding:9px 16px;font-weight:700;display:inline-flex;gap:7px;align-items:center;
+      }
+      .dots{display:flex;gap:7px;margin:20px 0 6px;flex-wrap:wrap}
+      .dot{height:10px;flex:1;min-width:26px;border-radius:99px;background:var(--line)}
+      .dot.done{background:var(--teal)}
+      .dot.now{background:var(--gold-bright)}
+      .phase-label{font-family:"Space Mono",monospace;font-size:.74rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+      .stage{
+        margin-top:14px;background:var(--surface);border:2px solid var(--line);border-radius:22px;
+        padding:30px;box-shadow:var(--shadow);
+      }
+      .stage .lesson-kicker{display:inline-flex;gap:8px;align-items:center;background:var(--teal-soft);color:var(--teal);font-weight:700;font-size:.78rem;border-radius:999px;padding:5px 13px;letter-spacing:.04em}
+      .stage .quiz-kicker{display:inline-flex;gap:8px;align-items:center;background:var(--gold-soft);color:var(--gold);font-weight:700;font-size:.78rem;border-radius:999px;padding:5px 13px;letter-spacing:.04em}
+      .stage h3{font-size:1.55rem;font-weight:800;margin:14px 0 10px}
+      .stage p{margin:0 0 12px}
+      .stage p:last-of-type{margin-bottom:0}
+      .powerup{
+        margin-top:18px;border-radius:14px;padding:15px 17px;background:var(--surface-2);
+        border:2px dashed var(--gold);font-size:.95rem;
+      }
+      .powerup strong{color:var(--gold);font-family:"Space Mono",monospace;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;display:block;margin-bottom:4px}
+      .stage-actions{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap;align-items:center}
+      .stage-actions .spacer{flex:1}
+      .xp-pop{font-family:"Space Mono",monospace;font-weight:700;color:var(--gold);font-size:.95rem}
+      .opts{display:grid;gap:11px;margin-top:18px}
+      .opt{
+        text-align:left;background:var(--bg);border:2px solid var(--line);border-radius:14px;
+        padding:15px 17px;font-size:1rem;display:flex;gap:12px;align-items:flex-start;width:100%;
+        transition:border-color .12s ease, background .12s ease;color:var(--ink);
+      }
+      .opt:hover:not(:disabled){border-color:var(--gold)}
+      .opt .letter{
+        font-family:"Space Mono",monospace;font-weight:700;flex:none;width:27px;height:27px;border-radius:8px;
+        background:var(--surface);border:2px solid var(--line);display:grid;place-items:center;font-size:.85rem;
+      }
+      .opt.correct{border-color:var(--green);background:var(--green-soft)}
+      .opt.correct .letter{background:var(--green);border-color:var(--green);color:#fff}
+      .opt.wrong{border-color:var(--red);background:var(--red-soft)}
+      .opt.wrong .letter{background:var(--red);border-color:var(--red);color:#fff}
+      .opt:disabled{cursor:default;opacity:1}
+      .opt.dim{opacity:.55}
+      .feedback{
+        display:none;margin-top:18px;border-radius:14px;padding:15px 17px;font-size:.96rem;
+      }
+      .feedback.show{display:block}
+      .feedback.good{background:var(--green-soft);border:2px solid var(--green)}
+      .feedback.bad{background:var(--red-soft);border:2px solid var(--red)}
+      .feedback strong{display:block;margin-bottom:3px}
+      /* results */
+      .results{text-align:center;padding:8px 0}
+      .results .big-stars{font-size:2.6rem;letter-spacing:8px;color:var(--line);margin:8px 0 2px}
+      .results .big-stars .on{color:var(--gold-bright)}
+      .results h3{font-size:1.9rem}
+      .badge-earned{
+        display:inline-flex;align-items:center;gap:10px;margin-top:16px;
+        background:var(--navy);color:var(--gold-bright);border-radius:999px;padding:10px 20px;
+        font-weight:700;border:2px solid var(--gold);
+      }
+      .score-line{font-family:"Space Mono",monospace;color:var(--muted);margin-top:10px}
+      .confetti{position:fixed;inset:0;pointer-events:none;z-index:99;overflow:hidden}
+      .confetti i{position:absolute;top:-14px;width:10px;height:14px;border-radius:2px;animation:fall linear forwards}
+      @keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
+      @media (prefers-reduced-motion: reduce){
+        .confetti{display:none}
+        html{scroll-behavior:auto}
+        *{transition:none !important;animation:none !important}
+      }
+
+      /* ---------- HQ / syllabus ---------- */
+      .hq-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}
+      .hq-card{background:var(--surface);border:2px solid var(--line);border-radius:var(--radius);padding:20px}
+      .hq-card h3{font-size:1.05rem;margin:0 0 10px;display:flex;gap:9px;align-items:center}
+      .hq-card h3 .ic{color:var(--gold);display:grid;place-items:center}
+      .hq-card p,.hq-card li{font-size:.94rem;color:var(--muted)}
+      .hq-card p{margin:0 0 8px}
+      .hq-card ul{margin:0;padding-left:18px}
+      .hq-card li{margin-bottom:5px}
+      .hq-card strong{color:var(--ink)}
+      table.grades{width:100%;border-collapse:collapse;font-size:.95rem}
+      table.grades th,table.grades td{padding:9px 10px;text-align:left;border-bottom:1.5px solid var(--line)}
+      table.grades th{font-family:"Space Mono",monospace;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+      table.grades td.num,table.grades th.num{text-align:right;font-family:"Space Mono",monospace}
+      table.grades tr.total td{font-weight:700;border-bottom:none;color:var(--ink)}
+      .scale-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+      .scale-row span{font-family:"Space Mono",monospace;font-size:.8rem;font-weight:700;background:var(--bg-soft);border:1.5px solid var(--line);border-radius:9px;padding:5px 11px}
+      .wide-card{grid-column:1/-1}
+      .assign-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+      .assign-grid div{background:var(--bg);border:1.5px solid var(--line);border-radius:12px;padding:13px 15px}
+      .assign-grid strong{display:block;color:var(--ink);margin-bottom:2px}
+      .assign-grid p{margin:0}
+
+      footer{margin-top:56px;border-top:2px solid var(--line);padding:26px 0 40px;color:var(--muted);font-size:.88rem}
+      footer .wrap{display:flex;gap:14px;flex-wrap:wrap;justify-content:space-between}
+
+      @media (max-width:960px){
+        .hero-grid{grid-template-columns:1fr}
+        .howto-grid{grid-template-columns:repeat(2,1fr)}
+        .hq-grid{grid-template-columns:1fr 1fr}
+      }
+      @media (max-width:640px){
+        body{font-size:16px}
+        .howto-grid{grid-template-columns:1fr}
+        .hq-grid{grid-template-columns:1fr}
+        .assign-grid{grid-template-columns:1fr}
+        .ep{grid-template-columns:60px 1fr;padding:16px}
+        .ep::before{left:45px}
+        .ep-medal{width:48px;height:48px}
+        .ep-medal .n{font-size:1.1rem}
+        .ep-side{grid-column:2;flex-direction:row;align-items:center;justify-content:space-between;width:100%}
+        .boss{grid-template-columns:1fr}
+        .boss .pts{text-align:left}
+        .stage{padding:22px 18px}
+        .levelbar{display:none}
+        table.grades th:nth-child(2),table.grades td:nth-child(2){display:none}
+      }
+
+      /* ---------- Episode 1 fun pass: Dr. K, pages, games, badges, certificate ---------- */
+      .drk-intro{background:var(--gold-soft);border:2px solid var(--gold);border-radius:var(--radius);padding:16px 18px;margin-bottom:18px}
+      .drk-intro strong{display:block;color:var(--gold);font-family:"Space Mono",monospace;font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px}
+      .drk-outro{background:var(--teal-soft);border:2px solid var(--teal);border-radius:var(--radius);padding:16px 18px;margin-top:20px;text-align:left}
+      .drk-aside{border-left:4px solid var(--gold);background:var(--gold-soft);padding:12px 16px;border-radius:0 12px 12px 0;font-style:italic;margin-top:14px}
+      .viz{margin-top:16px}
+      .viz-flow{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+      .viz-step{background:var(--bg-soft);border:2px solid var(--line);border-radius:12px;padding:9px 14px;font-weight:700}
+      .viz-arrow{color:var(--gold);font-weight:700}
+      .viz-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+      .viz-card{background:var(--surface);border:2px solid var(--line);border-radius:12px;padding:13px 14px}
+      .viz-card b{display:block;margin-bottom:3px}
+      .viz-card span{color:var(--muted);font-size:.9rem}
+      .viz-vs{display:flex;gap:8px;flex-wrap:wrap}
+      .viz-v{background:var(--surface);border:2px solid var(--line);border-radius:999px;padding:8px 14px;font-weight:700}
+      .viz-v span{display:block;font-weight:400;color:var(--muted);font-size:.8rem}
+      .viz-v.gold{border-color:var(--gold);background:var(--gold-soft)}
+      .viz-sent{background:var(--surface);border:2px dashed var(--gold);border-radius:12px;padding:14px 16px}
+      .game{margin-top:20px;background:var(--bg-soft);border:2px solid var(--line);border-radius:var(--radius);padding:18px}
+      .game h4{margin:0 0 6px}
+      .game .gintro{color:var(--muted);margin:0 0 14px}
+      .gitem{display:flex;gap:8px;flex-wrap:wrap;align-items:center;background:var(--surface);border:1.5px solid var(--line);border-radius:12px;padding:10px 12px;margin-bottom:10px}
+      .gitem>span:first-child{flex:1;min-width:200px}
+      .gbtn{background:var(--surface);border:2px solid var(--line);border-radius:999px;padding:6px 13px;font-weight:700;cursor:pointer}
+      .gbtn:hover{border-color:var(--gold)}
+      .gbtn.sel{background:var(--gold);color:#231a02;border-color:var(--gold)}
+      .gbtn:disabled{cursor:default;opacity:1}
+      .gitem.ok{border-color:var(--green);background:var(--green-soft)}
+      .gitem.no{border-color:var(--red)}
+      .gwhy{font-size:.9rem;color:var(--muted);width:100%}
+      .ggroup{margin-bottom:12px}
+      .ggroup>strong{display:block;margin-bottom:6px}
+      .ggroup.ok>strong{color:var(--green)}
+      .gdone{background:var(--green-soft);border:2px solid var(--green);border-radius:12px;padding:12px 14px;margin-top:12px;font-weight:700}
+      .badge-shelf{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:16px}
+      .badge-chip{background:var(--surface);border:2px solid var(--line);border-radius:999px;padding:8px 16px;font-weight:700}
+      .badge-chip.got{border-color:var(--gold);background:var(--gold-soft)}
+      .badge-chip.miss{opacity:.55}
+      .badge-chip small{display:block;font-weight:400;color:var(--muted);font-size:.75rem}
+      .cert-row{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap;justify-content:center;align-items:center}
+      .cert-row label{font-weight:700}
+      .cert-row input{padding:9px 12px;border:2px solid var(--line);border-radius:10px;font-size:1rem;max-width:280px;width:100%}
+      .shelf{text-align:left;max-width:640px;margin:22px auto 0;background:var(--surface);border:2px solid var(--line);border-radius:var(--radius);padding:18px 20px}
+      .shelf h4{margin:0 0 4px}
+      .shelf .snote{color:var(--muted);font-size:.9rem;margin:0 0 6px}
+      .shelf a{display:block;text-decoration:none;color:var(--ink);border-top:1.5px solid var(--line);padding:10px 0}
+      .shelf a:hover{color:var(--gold)}
+      .shelf a b{display:block}
+      .shelf a span{color:var(--muted);font-size:.88rem}
+      .shelf .kind{font-family:"Space Mono",monospace;font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--gold)}
+      .ep-badge{font-family:"Space Mono",monospace;font-size:.72rem;color:var(--gold);letter-spacing:.06em;text-transform:uppercase}
+      #cert-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;overflow:auto;padding:24px}
+      #cert-overlay.open{display:block}
+      .cert{background:#fff;color:#111;max-width:720px;margin:24px auto;padding:44px 48px;border-radius:8px;text-align:center}
+      .cert .c-kicker{font-family:"Space Mono",monospace;font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:#666}
+      .cert h2{font-size:2rem;margin:10px 0}
+      .cert .c-name{font-size:1.6rem;font-weight:700;margin:8px 0}
+      .cert .c-badge{display:inline-block;border:3px solid #b8860b;color:#7a5b00;border-radius:999px;padding:8px 22px;font-weight:700;margin:12px 0}
+      .cert .sig{margin-top:30px;border-top:2px solid #111;padding-top:10px}
+      .cert .c-foot{color:#666;font-size:.85rem;margin-top:18px}
+      .cert-actions{display:flex;gap:10px;justify-content:center;margin-top:16px}
+      @media print{
+        body *{visibility:hidden}
+        #cert-overlay,#cert-overlay *{visibility:visible}
+        #cert-overlay{position:absolute;inset:0;background:#fff;padding:0}
+        .cert{margin:0;max-width:none;box-shadow:none}
+        .cert-actions{display:none !important}
+      }
+    
+      /* ---------- FDI additions: hero pipeline, stat cards, tables, interactives ---------- */
+      .hero-pipe{display:flex;flex-direction:column;gap:8px}
+      .hero-pipe .hp-step{display:flex;align-items:center;gap:10px;background:var(--surface);border:2px solid var(--line);border-radius:12px;padding:10px 14px;font-weight:600;font-size:.98rem}
+      .hero-pipe .hp-step b{display:grid;place-items:center;width:26px;height:26px;flex:none;border-radius:50%;background:var(--navy);color:var(--gold-bright);font-size:.85rem}
+      .hero-pipe .hp-step.gold{border-color:var(--gold);background:var(--gold-soft)}
+      .fdi-prelim{display:inline-block;background:var(--red-soft);color:var(--red);border:2px solid var(--red);border-radius:8px;padding:3px 10px;font-family:"Space Mono",monospace;font-weight:700;font-size:.75rem;letter-spacing:.08em;margin-bottom:10px}
+      .viz-stats{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-top:6px}
+      .viz-stat{background:var(--surface);border:2px solid var(--line);border-radius:12px;padding:12px;text-align:center}
+      .viz-stat b{display:block;font-size:1.5rem;font-family:"Bricolage Grotesque",sans-serif}
+      .viz-stat span{font-size:.85rem;color:var(--muted)}
+      .fdi-table{width:100%;border-collapse:collapse;margin:8px 0 4px;font-size:.95rem}
+      .fdi-table th,.fdi-table td{border:1px solid var(--line);padding:7px 10px;text-align:left}
+      .fdi-table th{background:var(--bg-soft)}
+      .fdi-table tr.hl td{font-weight:700;background:var(--gold-soft)}
+      .fdi-note{font-size:.88rem;color:var(--muted);margin:6px 0 0}
+      .lmw{display:inline-block;margin:2px;padding:4px 8px;border:2px solid var(--line);border-radius:999px;background:var(--surface);font:inherit;font-size:.92rem}
+      .lmw:hover{border-color:var(--gold)}
+      .lmw.sel-pos{background:var(--green-soft);border-color:var(--green);font-weight:700}
+      .lmw.sel-neg{background:var(--red-soft);border-color:var(--red);font-weight:700}
+      .lmw.sel-none{background:var(--bg-soft);border-color:var(--muted);color:var(--muted);text-decoration:line-through}
+      .lmw:disabled{cursor:default}
+      .fdi-score{background:var(--surface);border:2px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:12px;font-family:"Space Mono",monospace;font-size:.92rem;line-height:1.8}
+      .fdi-score b{color:var(--ink)}
+      .fb-row{display:grid;grid-template-columns:88px 1fr 64px;gap:10px;align-items:center;margin:8px 0}
+      .fb-row label{font-weight:700}
+      .fb-row output{font-family:"Space Mono",monospace;font-weight:700;text-align:right}
+      .fb-row input[type=range]{width:100%;accent-color:var(--gold)}
+      .fb-bar{height:12px;border-radius:99px;background:var(--line);overflow:hidden;margin:2px 0 8px 98px}
+      .fb-bar i{display:block;height:100%;background:var(--gold-bright)}
+      .fb-bar.neg i{background:var(--red)}
+      .fb-bar.pos i{background:var(--green)}
+      .fb-verdict{margin-top:10px;padding:10px 14px;border-radius:12px;border:2px solid var(--gold);background:var(--gold-soft);font-weight:700}
+      .fb-verdict.review{border-color:var(--red);background:var(--red-soft)}
+    </style>
+  </head>
+  <body>
+    <!-- ================= HUD ================= -->
+    <header class="hud">
+      <div class="wrap hud-inner">
+        <div class="hud-brand">
+          <span class="crest" aria-hidden="true">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-8"/><path d="M22 20H2"/></svg>
+          </span>
+          <span>Financial Disclosure Intelligence<small>ADAM · University of Tulsa · DSI 2026</small></span>
+        </div>
+        <div class="hud-stats" aria-label="Your progress">
+          <span class="chip" title="Your level">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2l2.9 6.3 6.9.8-5.1 4.7 1.4 6.8L12 17.2 5.9 20.6l1.4-6.8L2.2 9.1l6.9-.8z"/></svg>
+            <span id="hud-level">Level 1 · Disclosure Rookie</span>
+            <span class="levelbar" aria-hidden="true"><i id="hud-levelbar" style="width:0%"></i></span>
+          </span>
+          <span class="chip xp" title="Experience points">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2L4.5 13.5H11L9.5 22 19 10h-6.5z"/></svg>
+            <span id="hud-xp">0 XP</span>
+          </span>
+          <span class="chip" title="Episodes cleared">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 21V4"/><path d="M4 5h13l-2.5 4L17 13H4"/></svg>
+            <span id="hud-cleared">0 / 5 cleared</span>
+          </span>
+        </div>
+      </div>
+    </header>
+
+    <main id="home">
+      <!-- ================= HERO ================= -->
+      <section class="hero">
+        <div class="wrap hero-grid">
+          <div>
+            <span class="kicker">DSI 2026 · 5 Episodes · Micro-learning</span>
+            <h1>Financial Disclosure Intelligence:<br /><span class="quest">From Model Disagreement to Disclosure Intelligence</span></h1>
+            <p class="sub">ADAM — an agentic decision-support system for financial narratives — played like a game. Each episode teaches one piece of the system in <strong>bite-size micro-lessons</strong>, then challenges you with checkpoint questions before you can move on. Clear all five episodes and level up from Disclosure Rookie to Disclosure Intelligence Master.</p>
+            <div class="hero-cta">
+              <button class="btn btn-gold" id="btn-start" type="button">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>
+                <span id="btn-start-label">Start Episode 1</span>
+              </button>
+              <a class="btn btn-ghost" href="#hq">About ADAM &amp; Sources</a>
+            </div>
+            <div class="hero-facts">
+              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> 5 episodes · 600 XP total</span>
+              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 016.5 17H20V4H6.5A2.5 2.5 0 004 6.5z"/></svg> Based on the ADAM paper · Topuz et al., DSI 2026</span>
+              <span><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 10L12 5 2 10l10 5 10-5z"/><path d="M6 12v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg> No prerequisites — just curiosity</span>
+            </div>
+          </div>
+          <div class="hero-art" style="margin:0">
+            <div class="hero-pipe" role="img" aria-label="The ADAM pipeline: six layers from disclosure to decision support">
+              <span class="hp-step"><b>1</b> Disclosure &amp; Decision Context</span>
+              <span class="hp-step"><b>2</b> Structuring &amp; Contextualization</span>
+              <span class="hp-step"><b>3</b> Three Specialized Evidence Agents</span>
+              <span class="hp-step gold"><b>4</b> Intelligent Adjudication</span>
+              <span class="hp-step"><b>5</b> Disclosure Intelligence Synthesis</span>
+              <span class="hp-step"><b>6</b> Decision-Support Outputs</span>
+            </div>
+            <figcaption>THE ADAM PIPELINE — 6 LAYERS FROM DISCLOSURE TO DECISION SUPPORT</figcaption>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= HOW IT PLAYS ================= -->
+      <section class="howto">
+        <div class="wrap">
+          <div class="section-head" style="margin-top:0">
+            <h2>How the quest works</h2>
+            <p>Learn a little, prove it, earn rewards — repeat.</p>
+          </div>
+          <div class="howto-grid">
+            <div class="how-card">
+              <div class="ic"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 016.5 17H20V4H6.5A2.5 2.5 0 004 6.5z"/><path d="M8 8h8M8 12h5"/></svg></div>
+              <div class="stepnum">Step 1 · Learn</div>
+              <h3>Micro-lessons</h3>
+              <p>Every episode opens with three short, focused lessons — one concept each, with a real business example. No 40-slide decks.</p>
+            </div>
+            <div class="how-card">
+              <div class="ic"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.3A2.6 2.6 0 1112 12.5V14"/><circle cx="12" cy="17.4" r=".4" fill="currentColor"/></svg></div>
+              <div class="stepnum">Step 2 · Prove it</div>
+              <h3>Checkpoint questions</h3>
+              <p>Three questions per episode with instant feedback and a full explanation for every answer.</p>
+            </div>
+            <div class="how-card">
+              <div class="ic"><svg width="21" height="21" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2L4.5 13.5H11L9.5 22 19 10h-6.5z"/></svg></div>
+              <div class="stepnum">Step 3 · Level up</div>
+              <h3>XP, stars &amp; badges</h3>
+              <p>Earn XP for every lesson and correct answer, collect a badge per episode, and climb from Disclosure Rookie to Disclosure Intelligence Master.</p>
+            </div>
+            <div class="how-card">
+              <div class="ic"><svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 21h8M12 17v4M7 4h10v6a5 5 0 01-10 0z"/><path d="M7 6H4a2 2 0 002 4h1M17 6h3a2 2 0 01-2 4h-1"/></svg></div>
+              <div class="stepnum">Step 4 · Think like ADAM</div>
+              <h3>Diagnose disagreement</h3>
+              <p>Disagreement is a clue, not noise. Learn why two good methods diverge — and whether the conflict is resolvable.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= EPISODE MAP ================= -->
+      <section>
+        <div class="wrap">
+          <div class="section-head">
+            <h2>Episode map</h2>
+            <p>Clear an episode to unlock the next checkpoint on the trail.</p>
+          </div>
+          <div class="trail" id="trail"></div>
+        </div>
+      </section>
+
+      <!-- ================= COURSE HQ ================= -->
+      <section id="hq">
+        <div class="wrap">
+          <div class="section-head">
+            <h2>About ADAM &amp; Sources</h2>
+            <p>The paper behind the game, the sources it stands on, and how to read its results honestly.</p>
+          </div>
+          <div class="hq-grid">
+            <div class="hq-card wide-card">
+              <h3>The episode map</h3>
+              <p>Five episodes, played in sequence — each one unlocks the next. The first four teach the system; the fifth teaches the study.</p>
+              <ul>
+                <li><strong>Episode 1 — What Are Disclosures? The 10-K</strong> · What a 10-K is, Items 1 / 1A / 7 / 8, why 10-Ks are hard, ADAM's data</li>
+                <li><strong>Episode 2 — The LM Dictionary</strong> · Loughran &amp; McDonald (2011), the six lists, the ~73.8% trap, the worked 50-word example</li>
+                <li><strong>Episode 3 — FinBERT Reads Context</strong> · Araci (2019), softmax, argmax, confidence, the 0.62 worked example</li>
+                <li><strong>Episode 4 — ADAM: Disagreement as Evidence</strong> · Six layers, three agents, adjudication, six discrepancy categories, preliminary results</li>
+                <li><strong>Episode 5 — Our Research: The ADAM Study Itself</strong> · Four research questions, four design requirements, the human reference set, nested evaluation</li>
+              </ul>
+            </div>
+            <div class="hq-card">
+              <h3>The ADAM authors</h3>
+              <p><strong>Kazim Topuz</strong> (presenter) · <strong>Jessica Bedson</strong> · <strong>Tally Ferguson</strong> · <strong>Thomas Kim</strong></p>
+              <p>The University of Tulsa · DSI 2026</p>
+              <p>Contact: <a href="mailto:Kazim-Topuz@utulsa.edu">Kazim-Topuz@utulsa.edu</a></p>
+              <p>Core idea, in the authors' words: preserve disagreement, diagnose it, and turn it into decision-relevant evidence.</p>
+            </div>
+            <div class="hq-card">
+              <h3>Your host</h3>
+              <p><strong>Dr. K — Dr. Kazim Topuz</strong>, Associate Professor of Business Analytics and Operations Management at The University of Tulsa, hosts every episode, signs your badge certificates, and drops a field tip at the end of each lesson.</p>
+            </div>
+            <div class="hq-card wide-card">
+              <h3>The big idea — three takeaways</h3>
+              <div class="assign-grid">
+                <div><strong>1 · Different models see different evidence</strong><p>Do not collapse that evidence too early. LM sees words; FinBERT sees sentences; context sees history and peers.</p></div>
+                <div><strong>2 · Disagreement can be diagnostically useful</strong><p>Ask why methods diverge — and whether the conflict is resolvable. A disagreement with a diagnosis is evidence; without one, it is just noise.</p></div>
+                <div><strong>3 · Decision support is more than accuracy</strong><p>Traceability, uncertainty, context, and human attention are part of the output. A system that hides its uncertainty is selling false precision.</p></div>
+              </div>
+            </div>
+            <div class="hq-card wide-card">
+              <h3>Sources</h3>
+              <ul>
+                <li><strong>Loughran &amp; McDonald (2011)</strong>, “When Is a Liability Not a Liability? Textual Analysis, Dictionaries, and 10-Ks”, <em>Journal of Finance</em> 66(1), 35–65 — the finance-specific sentiment dictionary: Positive, Negative, Uncertainty, Litigious, Modal (strong/weak); Constraining joined later (Bodnaruk, Loughran &amp; McDonald, 2015).</li>
+                <li><strong>Araci (2019)</strong>, “FinBERT: Financial Sentiment Analysis with Pre-trained Language Models”, arXiv:1908.10063 — BERT further pre-trained on finance text and fine-tuned on the Financial PhraseBank; an arXiv preprint / MSc thesis, not a peer-reviewed journal paper.</li>
+                <li><strong>Bochkay, Brown, Leone &amp; Tucker (2023)</strong>, “Textual Analysis in Accounting: What's Next?”, <em>Contemporary Accounting Research</em> 40(2), 765–805 — survey and roadmap of NLP textual analysis in accounting, organising conventional vs ML / deep-learning methods.</li>
+                <li><strong>Brown &amp; Tucker (2011)</strong>, “Large-Sample Evidence on Firms' Year-over-Year MD&amp;A Modifications”, <em>Journal of Accounting Research</em> 49(2), 309–348 — measures how much MD&amp;A changes year over year; MD&amp;A usefulness declines as boilerplate grows.</li>
+                <li><strong>Hevner, March, Park &amp; Ram (2004)</strong>, “Design Science in Information Systems Research”, <em>MIS Quarterly</em> 28(1), 75–105 — the foundational design-science framework ADAM cites for its design-science framing (with Gregor &amp; Hevner, 2013).</li>
+                <li><strong>SEC, “How to Read a 10-K/10-Q”</strong> — the structure of Items 1, 1A, 7, and 8 used in Episode 1 (sec.gov investor bulletin).</li>
+              </ul>
+            </div>
+            <div class="hq-card">
+              <h3>How to read the results</h3>
+              <p>Every ADAM result on this site is labelled <strong>PRELIMINARY — VALIDATION ONGOING</strong>. The evaluation uses a 300-paragraph human reference set; confirmatory testing, confidence intervals, and paired significance tests are still to come in the final paper. Treat the numbers as the current validation picture, not as final claims.</p>
+              <p>Probabilities in the FinBERT worked example (0.62 / 0.30 / 0.08) are <strong>illustrative teaching values, not a real model run</strong>. 10-K passages marked “illustrative paraphrase” are written in the style of a filing, not quoted from any company.</p>
+            </div>
+            <div class="hq-card">
+              <h3>A note on the numbers</h3>
+              <p>Slide 10 of the ADAM deck also prints “143,372 focal paragraphs”. The Item counts on the same slide sum to 179,623 (94,031 Item 1A + 85,592 Item 7), which is the figure used throughout this site. List sizes for the LM dictionary are approximate and version-dependent.</p>
+              <p>The (Positive − Negative) ÷ (Positive + Negative) = −0.091 figure is <strong>Henry's (2008)</strong> tone measure, shown for comparison — it is not LM 2011's formula.</p>
+            </div>
+            <div class="hq-card wide-card">
+              <h3>What you'll be able to do</h3>
+              <div class="assign-grid">
+                <div><strong>Navigate a 10-K</strong><p>Find Items 1, 1A, 7, and 8, and say what each one contains — and which two ADAM reads.</p></div>
+                <div><strong>Count like LM</strong><p>Score a passage with the LM lists, compute % Positive, % Negative, and net tone, and name the formula that is not LM's.</p></div>
+                <div><strong>Read FinBERT</strong><p>Turn a softmax distribution into a predicted class, a confidence, and a routing decision at the 0.80 threshold.</p></div>
+                <div><strong>Adjudicate</strong><p>Separate tone, economic direction, and informativeness — and diagnose a disagreement instead of averaging it away.</p></div>
+                <div><strong>Explain the study</strong><p>State the four research questions, the nested evaluation design, and why holding the adjudicator constant is the whole trick.</p></div>
+              </div>
+            </div>
+            <div class="hq-card wide-card">
+              <h3>Where it gets tricky — and why that's normal</h3>
+              <div class="assign-grid">
+                <div><strong>Words that look negative</strong><p>Tax, cost, capital, board, vice: a general dictionary flags them; finance does not. Always ask which dictionary produced a score.</p></div>
+                <div><strong>Two formulas, one sign</strong><p>LM's net tone (−0.02) and Henry's measure (−0.091) agree on direction and disagree on magnitude. The formula matters as much as the words.</p></div>
+                <div><strong>A clear label, a weak confidence</strong><p>FinBERT can say “Negative” at 0.62 confidence. The label is not the confidence — and below 0.80, ADAM sends it to a human.</p></div>
+                <div><strong>Judge-only is already strong</strong><p>On sentiment and direction the LLM alone does most of the work. The architecture's proven gain is informativeness — say so honestly.</p></div>
+                <div><strong>Humans disagree too</strong><p>Three careful reviewers agree unanimously only 21% of the time on sentiment. That is a fact about the task, not a failure of the study.</p></div>
+              </div>
+            </div>
+            <div class="hq-card wide-card">
+              <h3>About this site</h3>
+              <p>A static, single-page practice companion for the ADAM paper (Topuz, Bedson, Ferguson &amp; Kim, University of Tulsa, DSI 2026). Nothing here is graded and nothing is uploaded: all progress (XP, stars, badges) lives in memory for this session only and resets when the page reloads. All interactive elements run in your browser with no external services.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        <div class="wrap">
+          <span><strong>Financial Disclosure Intelligence</strong> — based on ADAM (Topuz, Bedson, Ferguson &amp; Kim, University of Tulsa, DSI 2026)</span>
+          <span>Progress is session-only and resets on reload. All ADAM results are preliminary — validation ongoing.</span>
+        </div>
+      </footer>
+    </main>
+
+    <!-- ================= PLAYER ================= -->
+    <section id="player" aria-live="polite">
+      <div class="wrap player-shell">
+        <div class="player-top">
+          <div>
+            <div class="chap" id="p-chap"></div>
+            <h2 id="p-title"></h2>
+          </div>
+          <button class="btn-exit" id="btn-exit" type="button">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+            Exit to map
+          </button>
+        </div>
+        <div class="dots" id="p-dots" aria-hidden="true"></div>
+        <div class="phase-label" id="p-phase"></div>
+        <div class="stage" id="p-stage"></div>
+      </div>
+    </section>
+
+    <div class="confetti" id="confetti" aria-hidden="true"></div>
+
+      <div id="cert-overlay" role="dialog" aria-label="Badge certificate">
+        <div class="cert">
+          <div class="c-kicker">Financial Disclosure Intelligence · ADAM</div>
+          <h2>Certificate of Achievement</h2>
+          <p>This badge is awarded to</p>
+          <div class="c-name" id="cert-name">A Disclosure Intelligence player</div>
+          <p>for completing <strong id="cert-ep">Episode 1</strong></p>
+          <div class="c-badge" id="cert-badge">Episode Badge</div>
+          <p id="cert-score"></p>
+          <p id="cert-bonus"></p>
+          <p id="cert-date"></p>
+          <div class="sig">Dr. K — Dr. Kazim Topuz<br><small>Financial Disclosure Intelligence · University of Tulsa</small></div>
+          <p class="c-foot">Practice companion — progress is session-only. All ADAM results are preliminary.</p>
+        </div>
+        <div class="cert-actions">
+          <button class="btn btn-gold" id="btn-cert-print" type="button">Print / Save as PDF</button>
+          <button class="btn btn-ghost" id="btn-cert-close" type="button">Close</button>
+        </div>
+      </div>
+    <script>
+      /* ============================================================
+         EPISODE DATA — micro-lessons + checkpoint questions
+         ============================================================ */
+      var EPISODES = [{"badge": "10-K Navigator Badge", "blurb": "Dr. K hosts a guided tour of the 10-K: the annual report every U.S. public company files, the four Items that matter most, and why these documents are so hard to read that we needed to build ADAM in the first place.", "chapter": "ADAM · The 10-K", "host": "Dr. K", "intro": "<p>Welcome aboard — I'm Dr. K, and before we argue about what a disclosure means, we need to know where disclosures live. This episode is a guided tour of the 10-K: the annual report every U.S. public company files, the four Items that matter most, and why these documents are so hard to read that we needed to build ADAM in the first place.</p>", "lessons": [{"body": ["A Form 10-K is the annual report most U.S. public companies must file each year with the Securities and Exchange Commission (SEC). The company writes it, the SEC sets the topics and their fixed order, and anyone can read it for free on EDGAR, the SEC's public filing database.", "It is not a marketing brochure. The chief executive and chief financial officer must certify its accuracy — and the filing has a deadline: 60 days after fiscal year-end for large accelerated filers (public float of $700 million or more), 75 days for accelerated filers, and 90 days for everyone else.", "The 10-K is long because it has to be: it must cover the business, its risks, management's view of performance, and audited financial statements, all in one document. That length is exactly the problem ADAM was built to attack."], "h": "What a 10-K actually is", "tip": "If you ever open a real 10-K, start with the table of contents and jump straight to Item 1A and Item 7 — the two narrative sections ADAM reads. The rest is reference material until you need it.", "pages": [{"h": "What a 10-K actually is", "body": ["A Form 10-K is the annual report most U.S. public companies must file each year with the Securities and Exchange Commission (SEC). The company writes it, the SEC sets the topics and their fixed order, and anyone can read it for free on EDGAR, the SEC's public filing database."]}, {"h": "What a 10-K actually is", "body": ["It is not a marketing brochure. The chief executive and chief financial officer must certify its accuracy — and the filing has a deadline: 60 days after fiscal year-end for large accelerated filers (public float of $700 million or more), 75 days for accelerated filers, and 90 days for everyone else."]}, {"h": "What a 10-K actually is", "body": ["The 10-K is long because it has to be: it must cover the business, its risks, management's view of performance, and audited financial statements, all in one document. That length is exactly the problem ADAM was built to attack."]}]}, {"body": ["<strong>Item 1 — Business:</strong> what the company does — its main products and services, subsidiaries, and markets, plus competition, regulation, labour, operating costs, and seasonality.", "<strong>Item 1A — Risk Factors:</strong> the most significant risks to the company and its securities, generally listed in order of importance. It focuses on the risks themselves — not on how the company plans to address them. Risks can be economy-wide, industry-wide, or unique to the firm. (Illustrative paraphrase, not a company quote: “Our business faces risks that could cause actual results to differ materially from expectations, including competition, supply disruption, regulation, and litigation.”)", "<strong>Item 7 — MD&A (Management's Discussion and Analysis):</strong> management's own-words perspective on the past year — operations and results, liquidity and capital resources, known trends and uncertainties, material changes from prior periods, and critical accounting judgments. (Illustrative paraphrase: “Revenue rose this year because volumes increased, partly offset by higher costs; liquidity remains adequate, but a known trend in input prices could affect future margins.”)", "<strong>Item 8 — Financial Statements:</strong> the audited numbers — income statement, balance sheets, statement of cash flows, and statement of stockholders' equity, plus explanatory notes, prepared under GAAP and audited by an independent accountant. ADAM reads Items 1A and 7 because they are the narrative-heavy sections — and because they have different linguistic baselines: risk-factor language sounds different from management's own story, and a fair reader has to know which room it is standing in."], "h": "Inside the 10-K: Items 1, 1A, 7, 8", "tip": "Item 1A warns you about what could go wrong. Item 7 tells you what did happen and what management thinks comes next. Confuse the two and you will read a warning as a confession.", "pages": [{"h": "Inside the 10-K: Items 1, 1A, 7, 8", "body": ["<strong>Item 1 — Business:</strong> what the company does — its main products and services, subsidiaries, and markets, plus competition, regulation, labour, operating costs, and seasonality."]}, {"h": "Inside the 10-K: Items 1, 1A, 7, 8", "body": ["<strong>Item 1A — Risk Factors:</strong> the most significant risks to the company and its securities, generally listed in order of importance. It focuses on the risks themselves — not on how the company plans to address them. Risks can be economy-wide, industry-wide, or unique to the firm. (Illustrative paraphrase, not a company quote: “Our business faces risks that could cause actual results to differ materially from expectations, including competition, supply disruption, regulation, and litigation.”)"]}, {"h": "Inside the 10-K: Items 1, 1A, 7, 8", "body": ["<strong>Item 7 — MD&A (Management's Discussion and Analysis):</strong> management's own-words perspective on the past year — operations and results, liquidity and capital resources, known trends and uncertainties, material changes from prior periods, and critical accounting judgments. (Illustrative paraphrase: “Revenue rose this year because volumes increased, partly offset by higher costs; liquidity remains adequate, but a known trend in input prices could affect future margins.”)"]}, {"h": "Inside the 10-K: Items 1, 1A, 7, 8", "body": ["<strong>Item 8 — Financial Statements:</strong> the audited numbers — income statement, balance sheets, statement of cash flows, and statement of stockholders' equity, plus explanatory notes, prepared under GAAP and audited by an independent accountant. ADAM reads Items 1A and 7 because they are the narrative-heavy sections — and because they have different linguistic baselines: risk-factor language sounds different from management's own story, and a fair reader has to know which room it is standing in."]}]}, {"body": ["Three things make 10-Ks hard. <strong>Volume:</strong> narrative sections are long, and reviewing them paragraph by paragraph is slow and costly. <strong>Repetition:</strong> material language is mixed with prior-year carryover, boilerplate, and legal caution. <strong>Interpretive difficulty:</strong> tone, economic direction, and informativeness are not the same construct — a paragraph can sound negative, describe no real economic harm, and carry no new information, all at once.", "ADAM's empirical setting is deliberately broad: <strong>55 firms</strong>, five from each of <strong>11 GICS sectors</strong>, over <strong>10 years (2016–2025)</strong> — <strong>550 firm-year 10-Ks</strong> yielding <strong>179,623 focal paragraphs</strong>: <strong>94,031</strong> from Item 1A and <strong>85,592</strong> from Item 7. Another <strong>32,407 paragraphs</strong> from 2014–2015 filings serve only as historical context, so the system can tell what is new from what is carried over.", "The unit of analysis is the contextualized paragraph object: every paragraph stays linked to its firm, year, section, sector, prior-year context, peer context, and provenance — so any conclusion can be traced back to the exact words it came from.", "A note on the numbers: slide 10 of the ADAM deck also prints “143,372 focal paragraphs.” The Item counts on the same slide sum to 179,623 (94,031 + 85,592), which is the figure used throughout this site."], "game": {"buckets": ["Item 1A — Risk Factors", "Item 7 — MD&A"], "done": "Four for four. You can tell a warning about the future from an explanation of the past — which is the first skill a disclosure reader needs.", "hint": "Not quite — ask: is this a risk that might happen, or management explaining what did happen?", "intro": "Four short passages, written in the style of a 10-K (illustrative paraphrases, not real company quotes). Sort each into the Item it belongs to — Item 1A (Risk Factors) or Item 7 (MD&A).", "items": [{"b": 0, "t": "“Our business faces risks that could cause actual results to differ materially from expectations, including competition, supply disruption, regulation, and litigation.”", "why": "It lists risks themselves — competition, supply, regulation, litigation — without explaining how the company will address them. That is Item 1A's job."}, {"b": 1, "t": "“Revenue rose this year because volumes increased, partly offset by higher costs; liquidity remains adequate, but a known trend in input prices could affect future margins.”", "why": "Management explaining results, liquidity, and a known trend in its own words — classic MD&A."}, {"b": 0, "t": "“Changes in tax law or trade rules in the countries where we operate could materially increase our costs or limit our ability to sell.”", "why": "A potential threat, stated as a risk — not a discussion of what actually happened this year."}, {"b": 1, "t": "“Management believes cash on hand plus operating cash flow will fund operations for the next twelve months, although planned capital spending is expected to rise.”", "why": "A forward look at liquidity and capital resources from management's perspective — MD&A territory."}], "title": "Dr. K Challenge: Which Item is this passage from?", "type": "sort"}, "h": "Why 10-Ks are hard — and the data ADAM reads", "tip": "Boilerplate is the enemy of attention: language repeated unchanged for years looks serious and means almost nothing new. ADAM's Context &amp; Quality Agent exists to catch exactly that.", "visual": "adam-data", "visual_page": 1, "pages": [{"h": "Why 10-Ks are hard — and the data ADAM reads", "body": ["Three things make 10-Ks hard. <strong>Volume:</strong> narrative sections are long, and reviewing them paragraph by paragraph is slow and costly. <strong>Repetition:</strong> material language is mixed with prior-year carryover, boilerplate, and legal caution. <strong>Interpretive difficulty:</strong> tone, economic direction, and informativeness are not the same construct — a paragraph can sound negative, describe no real economic harm, and carry no new information, all at once."]}, {"h": "Why 10-Ks are hard — and the data ADAM reads", "body": ["ADAM's empirical setting is deliberately broad: <strong>55 firms</strong>, five from each of <strong>11 GICS sectors</strong>, over <strong>10 years (2016–2025)</strong> — <strong>550 firm-year 10-Ks</strong> yielding <strong>179,623 focal paragraphs</strong>: <strong>94,031</strong> from Item 1A and <strong>85,592</strong> from Item 7. Another <strong>32,407 paragraphs</strong> from 2014–2015 filings serve only as historical context, so the system can tell what is new from what is carried over."], "visual": "adam-data"}, {"h": "Why 10-Ks are hard — and the data ADAM reads", "body": ["The unit of analysis is the contextualized paragraph object: every paragraph stays linked to its firm, year, section, sector, prior-year context, peer context, and provenance — so any conclusion can be traced back to the exact words it came from."]}, {"h": "Why 10-Ks are hard — and the data ADAM reads", "body": ["A note on the numbers: slide 10 of the ADAM deck also prints “143,372 focal paragraphs.” The Item counts on the same slide sum to 179,623 (94,031 + 85,592), which is the figure used throughout this site."]}]}], "n": 1, "outro": "You can now open a 10-K and know where you are — Business, Risk Factors, MD&A, Financial Statements — and why the same paragraph can look scary and say very little. Next, the dictionary that taught computers to read these filings — and the trap it walks into.", "quiz": [{"a": 1, "opts": ["Item 1 — Business", "Item 1A — Risk Factors", "Item 7 — MD&A", "Item 8 — Financial Statements"], "q": "Which Item of a 10-K lists the company's most significant risks, generally in order of importance?", "why": "Item 1A — Risk Factors is the risk list, ordered by importance, and it describes the risks themselves rather than how the company addresses them. Item 1 covers the business, Item 7 is management's view of performance, and Item 8 holds the audited statements."}, {"a": 0, "opts": ["550 firm-year 10-Ks; 179,623 focal paragraphs", "55 firm-year 10-Ks; 179,623 focal paragraphs", "550 firm-year 10-Ks; 143,372 focal paragraphs", "550 firm-year 10-Ks; 32,407 focal paragraphs"], "q": "ADAM's focal data covers 55 firms over 2016–2025. How many firm-year 10-Ks and focal paragraphs is that?", "why": "55 firms × 10 years = 550 firm-year 10-Ks, yielding 179,623 focal paragraphs (94,031 from Item 1A + 85,592 from Item 7 = 179,623). The 143,372 printed on slide 10 is a slide error — the item counts sum to 179,623 — and 32,407 is the separate 2014–2015 historical context."}, {"a": 1, "opts": ["Because Item 1A is unaudited and cannot be trusted", "Because tone, economic direction, and informativeness are different things — negative wording can be routine boilerplate", "Because all Item 1A language is legally required to sound negative", "Because Item 7 always reverses what Item 1A says"], "q": "A paragraph in Item 1A sounds very negative. Why is that NOT, on its own, evidence of bad news for the company?", "why": "Tone, economic direction, and informativeness are three separate constructs. A negative-sounding paragraph can be routine risk-factor boilerplate — the same words as last year, no new information — which is why ADAM separates the three instead of collapsing them into one score."}], "tags": ["Form 10-K", "Items 1 · 1A · 7 · 8", "179,623 paragraphs"], "title": "What Are Disclosures? The 10-K"}, {"badge": "Lexicon Detective Badge", "blurb": "Dr. K hosts: Loughran & McDonald (2011) gave computers a finance dictionary — and a counting rule. You become the counter: fifty words, two lists, one net tone. Watch out for the words that look negative and aren't.", "chapter": "Loughran & McDonald (2011)", "host": "Dr. K", "intro": "<p>Dr. K here. Computers can't read — they count. So in 2011, Loughran and McDonald gave them a finance dictionary and a counting rule. This episode, you become the counter: fifty words, two lists, one net tone. Watch out for the words that look negative and aren't.</p>", "lessons": [{"body": ["In 2011, Loughran and McDonald asked a simple question: what happens when you count sentiment in 10-Ks with a general-purpose word list? The answer was a warning. About <strong>73.8%</strong> — nearly three-fourths — of the negative word counts produced by the Harvard-IV dictionary in 10-Ks are words that are not negative in finance at all: <strong>tax, cost, capital, liability, board, vice</strong>. A tax is a fact of business, not a complaint; a board is a group of directors, not a piece of lumber.", "It gets worse: words like <strong>mine, cancer,</strong> and <strong>crude</strong> mark an industry, not an event — a mining company, a drug trial, an oil producer. A general dictionary reads the word and misses the world.", "So Loughran and McDonald built finance-specific lists instead. Their paper — “When Is a Liability Not a Liability? Textual Analysis, Dictionaries, and 10-Ks”, <em>Journal of Finance</em> 66(1), 35–65 — gives the LM agent its evidence. The lists ADAM uses: <strong>Positive, Negative, Uncertainty, Litigious, Constraining,</strong> and <strong>Modal (strong and weak)</strong>. Approximate, version-dependent sizes: Positive ~354, Negative ~2,337–2,355, Uncertainty ~297, Litigious ~904, Strong Modal 19, Weak Modal 27. Constraining (~184 words) is a later addition from Bodnaruk, Loughran &amp; McDonald (2015) — it was not in the original 2011 six, but it belongs to the same family."], "h": "Why a general dictionary fails in finance", "tip": "Before trusting any sentiment score, ask which dictionary produced it. A score built on the wrong word list is confident, precise, and wrong.", "pages": [{"h": "Why a general dictionary fails in finance", "body": ["In 2011, Loughran and McDonald asked a simple question: what happens when you count sentiment in 10-Ks with a general-purpose word list? The answer was a warning. About <strong>73.8%</strong> — nearly three-fourths — of the negative word counts produced by the Harvard-IV dictionary in 10-Ks are words that are not negative in finance at all: <strong>tax, cost, capital, liability, board, vice</strong>. A tax is a fact of business, not a complaint; a board is a group of directors, not a piece of lumber."]}, {"h": "Why a general dictionary fails in finance", "body": ["It gets worse: words like <strong>mine, cancer,</strong> and <strong>crude</strong> mark an industry, not an event — a mining company, a drug trial, an oil producer. A general dictionary reads the word and misses the world."]}, {"h": "Why a general dictionary fails in finance", "body": ["So Loughran and McDonald built finance-specific lists instead. Their paper — “When Is a Liability Not a Liability? Textual Analysis, Dictionaries, and 10-Ks”, <em>Journal of Finance</em> 66(1), 35–65 — gives the LM agent its evidence. The lists ADAM uses: <strong>Positive, Negative, Uncertainty, Litigious, Constraining,</strong> and <strong>Modal (strong and weak)</strong>. Approximate, version-dependent sizes: Positive ~354, Negative ~2,337–2,355, Uncertainty ~297, Litigious ~904, Strong Modal 19, Weak Modal 27. Constraining (~184 words) is a later addition from Bodnaruk, Loughran &amp; McDonald (2015) — it was not in the original 2011 six, but it belongs to the same family."]}]}, {"body": ["LM's own measures are proportions. Count the list words, divide by the total words in the passage: % Positive = Positive ÷ total words, % Negative = Negative ÷ total words, and net LM tone = (Positive − Negative) ÷ total words. Per 1,000 words is the same measure rescaled: (count ÷ total words) × 1,000.", "Here is the teaching passage — 50 words, written in 10-K style, invented for this lesson: “Strong demand helped sales improve this year, and efficient operations delivered a clear benefit to shareholders. Management expects continued success from new products. However, revenue faced a decline in one segment, a loss on discontinued operations, and higher risk from volatility, leaving the outlook weak and a burden on margins.”", "Count it by hand. Positive (5): <strong>strong, improve, efficient, benefit, success</strong>. Negative (6): <strong>decline, loss, risk, volatility, weak, burden</strong>. No other word in the passage is on either list — “expects”, for example, is not an LM Positive word, and “operations” appears twice but is on neither list.", "The arithmetic: %Pos = 5 ÷ 50 = <strong>10.0%</strong>; %Neg = 6 ÷ 50 = <strong>12.0%</strong>; net LM tone = (5 − 6) ÷ 50 = <strong>−0.02 (−2.0%)</strong>. Per 1,000 words: Positive 100, Negative 120, net <strong>−20 per 1,000 words</strong>.", "One formula you will NOT see here as LM's: (Positive − Negative) ÷ (Positive + Negative) = −1 ÷ 11 = <strong>−0.091</strong>. That is Henry's (2008) tone measure — widely used with LM lists, but not LM 2011's formula. Same sign, different magnitude: which is why the formula matters as much as the words."], "h": "How sentiment is calculated — the worked example", "tip": "Try the counter below before you trust the numbers above. Click every word you think is on a list — then reveal the answer and see which of your picks the dictionary disagrees with.", "visual": "lm-counter", "visual_page": 2, "pages": [{"h": "How sentiment is calculated — the worked example", "body": ["LM's own measures are proportions. Count the list words, divide by the total words in the passage: % Positive = Positive ÷ total words, % Negative = Negative ÷ total words, and net LM tone = (Positive − Negative) ÷ total words. Per 1,000 words is the same measure rescaled: (count ÷ total words) × 1,000."]}, {"h": "How sentiment is calculated — the worked example", "body": ["Here is the teaching passage — 50 words, written in 10-K style, invented for this lesson: “Strong demand helped sales improve this year, and efficient operations delivered a clear benefit to shareholders. Management expects continued success from new products. However, revenue faced a decline in one segment, a loss on discontinued operations, and higher risk from volatility, leaving the outlook weak and a burden on margins.”"]}, {"h": "How sentiment is calculated — the worked example", "body": ["Count it by hand. Positive (5): <strong>strong, improve, efficient, benefit, success</strong>. Negative (6): <strong>decline, loss, risk, volatility, weak, burden</strong>. No other word in the passage is on either list — “expects”, for example, is not an LM Positive word, and “operations” appears twice but is on neither list."], "visual": "lm-counter"}, {"h": "How sentiment is calculated — the worked example", "body": ["The arithmetic: %Pos = 5 ÷ 50 = <strong>10.0%</strong>; %Neg = 6 ÷ 50 = <strong>12.0%</strong>; net LM tone = (5 − 6) ÷ 50 = <strong>−0.02 (−2.0%)</strong>. Per 1,000 words: Positive 100, Negative 120, net <strong>−20 per 1,000 words</strong>."]}, {"h": "How sentiment is calculated — the worked example", "body": ["One formula you will NOT see here as LM's: (Positive − Negative) ÷ (Positive + Negative) = −1 ÷ 11 = <strong>−0.091</strong>. That is Henry's (2008) tone measure — widely used with LM lists, but not LM 2011's formula. Same sign, different magnitude: which is why the formula matters as much as the words."]}]}, {"body": ["The LM agent's strength is that it is <strong>transparent and auditable</strong>: every point of its score can be traced to a specific word on a published list. If you disagree with the score, you can open the list and argue about the word. No black box, no mystery weights.", "Its limit is that it is <strong>context-blind</strong>. It counts words, not sentences. Negation defeats it: “not expected to face a loss” still counts “loss” as negative. Legal language defeats it: litigious terms are not the same as distress. And it cannot tell fresh news from boilerplate — a risk paragraph repeated unchanged for five years scores exactly the same as one written yesterday.", "That is why ADAM keeps LM as one agent among three — never as the whole verdict. Its evidence is real, but it is lexical evidence only, and the adjudicator needs to know what it cannot see."], "game": {"done": "Counted, checked, and honest about the limits. A dictionary is a good witness — and a bad judge.", "groups": [{"a": 0, "hint": "Count only strong, improve, efficient, benefit, success.", "label": "Positive words in the 50-word passage", "options": ["5", "6", "11"]}, {"a": 0, "hint": "decline, loss, risk, volatility, weak, burden — six of them.", "label": "Negative words in the passage", "options": ["6", "5", "12"]}, {"a": 0, "hint": "(5 − 6) ÷ 50 = −0.02. The −0.091 is Henry's measure, not LM's.", "label": "Net LM tone (Positive − Negative) ÷ total words", "options": ["−0.02", "−0.091", "+0.02"]}], "intro": "The 50-word passage, one more time — but now you do the counting. Build the score, slot by slot.", "sentence": "5 positive, 6 negative — net LM tone −0.02.", "title": "Dr. K Challenge: Score the passage", "type": "build"}, "h": "Strengths — and the limits that matter", "tip": "A dictionary can tell you a passage contains the word “risk” six times. It cannot tell you whether the risk is new, whether it matters, or whether the sentence actually says the opposite. That is the rest of the system.", "pages": [{"h": "Strengths — and the limits that matter", "body": ["The LM agent's strength is that it is <strong>transparent and auditable</strong>: every point of its score can be traced to a specific word on a published list. If you disagree with the score, you can open the list and argue about the word. No black box, no mystery weights."]}, {"h": "Strengths — and the limits that matter", "body": ["Its limit is that it is <strong>context-blind</strong>. It counts words, not sentences. Negation defeats it: “not expected to face a loss” still counts “loss” as negative. Legal language defeats it: litigious terms are not the same as distress. And it cannot tell fresh news from boilerplate — a risk paragraph repeated unchanged for five years scores exactly the same as one written yesterday."]}, {"h": "Strengths — and the limits that matter", "body": ["That is why ADAM keeps LM as one agent among three — never as the whole verdict. Its evidence is real, but it is lexical evidence only, and the adjudicator needs to know what it cannot see."]}]}], "n": 2, "outro": "You counted like LM counts — and you saw the trap: a dictionary sees words, not sentences. “Not expected to…” will fool it every time. Next, a model that actually reads the sentence: FinBERT.", "quiz": [{"a": 0, "opts": ["10.0% and 12.0%", "5% and 6%", "100 and 120", "−0.02 and −0.091 (Henry's measure)"], "q": "In the 50-word worked example, what are the LM % Positive and % Negative?", "why": "Positive 5 ÷ 50 = 10.0% and Negative 6 ÷ 50 = 12.0%. “100 and 120” are the per-1,000-words counts, and −0.02 is the net tone, not a percentage."}, {"a": 0, "opts": ["(Positive − Negative) ÷ total words", "(Positive − Negative) ÷ (Positive + Negative)", "(Positive + Negative) ÷ total words", "Positive − Negative, counted per 1,000 words"], "q": "Which of these is LM 2011's own net tone formula?", "why": "LM 2011's measures are proportions of total words: net tone = (Positive − Negative) ÷ total words = −0.02 in the worked example. (Positive − Negative) ÷ (Positive + Negative) = −0.091 is Henry's (2008) tone measure — a different formula, not LM's."}, {"a": 0, "opts": ["About 73.8% of Harvard-IV negative counts in 10-Ks are words like tax, cost, capital, board, and vice — not negative in finance", "It ignores every negative word in the filing", "It only reads Item 8, the financial statements", "It cannot count passages longer than 50 words"], "q": "Why does a general dictionary misread 10-Ks?", "why": "Loughran &amp; McDonald (2011) found about 73.8% (nearly three-fourths) of Harvard-IV negative word counts in 10-Ks are words that are not negative in a finance context — tax, cost, capital, liability, board, vice — plus industry markers like mine, cancer, and crude. That is why finance needs its own lists."}], "tags": ["LM lists", "The ~73.8% trap", "Net tone −0.02"], "title": "The LM Dictionary"}, {"badge": "Context Reader Badge", "blurb": "Dr. K hosts: FinBERT (Araci 2019) — a transformer that read enough finance text to know “fell sharply” is not a compliment. What a softmax is, why 0.62 is a weak kind of confident, and why even a good reader can't tell you whether a paragraph matters.", "chapter": "Araci (2019)", "host": "Dr. K", "intro": "<p>Dr. K here, with FinBERT — a transformer that read enough finance text to know that “fell sharply” is not a compliment. This episode, you learn what a softmax is, why 0.62 is a weak kind of confident, and why even a good reader still can't tell you whether a paragraph matters.</p>", "lessons": [{"body": ["FinBERT (Araci, 2019) — “FinBERT: Financial Sentiment Analysis with Pre-trained Language Models”, arXiv:1908.10063 — starts from BERT and keeps training it on finance text (a Reuters TRC2 financial subset), then fine-tunes it for sentiment on the <strong>Financial PhraseBank</strong> (Malo et al., 2014): 4,845 sentences of financial news, labelled by annotators. Note the venue: this is an arXiv preprint and MSc thesis from the University of Amsterdam, not a peer-reviewed journal paper — and it still became the standard finance sentiment model.", "Unlike a dictionary, FinBERT reads the whole sentence at once: word order, negation, and context all shape its judgment. That is its strength — semantic context — and its cost: lower direct traceability. You can see its probabilities, but you cannot point at the single word that caused them the way you can with LM.", "What it returns is a probability distribution over three classes — positive, negative, neutral — via a softmax. The <strong>predicted class is the argmax</strong> (the class with the highest probability), and the <strong>confidence is the max probability</strong> (how high that highest number is)."], "h": "FinBERT: a transformer that read finance", "tip": "LM asks “which list words are here?” FinBERT asks “what does this sentence mean?” Both questions are worth asking — and they can give different answers, which is where Episode 4 begins.", "pages": [{"h": "FinBERT: a transformer that read finance", "body": ["FinBERT (Araci, 2019) — “FinBERT: Financial Sentiment Analysis with Pre-trained Language Models”, arXiv:1908.10063 — starts from BERT and keeps training it on finance text (a Reuters TRC2 financial subset), then fine-tunes it for sentiment on the <strong>Financial PhraseBank</strong> (Malo et al., 2014): 4,845 sentences of financial news, labelled by annotators. Note the venue: this is an arXiv preprint and MSc thesis from the University of Amsterdam, not a peer-reviewed journal paper — and it still became the standard finance sentiment model."]}, {"h": "FinBERT: a transformer that read finance", "body": ["Unlike a dictionary, FinBERT reads the whole sentence at once: word order, negation, and context all shape its judgment. That is its strength — semantic context — and its cost: lower direct traceability. You can see its probabilities, but you cannot point at the single word that caused them the way you can with LM."]}, {"h": "FinBERT: a transformer that read finance", "body": ["What it returns is a probability distribution over three classes — positive, negative, neutral — via a softmax. The <strong>predicted class is the argmax</strong> (the class with the highest probability), and the <strong>confidence is the max probability</strong> (how high that highest number is)."]}]}, {"body": ["Take the sentence: “Revenue fell sharply as costs rose and demand weakened.” Suppose FinBERT returns these probabilities — <strong>illustrative teaching values, not a real model run</strong>: P(Negative) = 0.62, P(Neutral) = 0.30, P(Positive) = 0.08.", "First, check the distribution sums to one: 0.62 + 0.30 + 0.08 = <strong>1.00</strong>. A softmax always sums to 1 — if your three numbers don't, something is wrong before you start.", "Predicted class = argmax = <strong>Negative</strong>, because 0.62 is the largest of the three. Confidence = max probability = <strong>0.62</strong>.", "And 0.62 is a weak kind of confident. ADAM's review threshold is 0.80 — any paragraph whose confidence is below 0.80 goes to a human for review. This paragraph, at 0.62, <strong>routes to review</strong>, even though its predicted class is clear. A confident-sounding label and a low confidence number can live in the same output."], "h": "The worked example, step by step", "tip": "Play with the bars below: push Negative to 0.95 and watch the verdict flip to “automated”. Then drag it back to 0.62 and watch it fall into review. The threshold is doing the work, not the label.", "visual": "finbert-bar", "visual_page": 3, "pages": [{"h": "The worked example, step by step", "body": ["Take the sentence: “Revenue fell sharply as costs rose and demand weakened.” Suppose FinBERT returns these probabilities — <strong>illustrative teaching values, not a real model run</strong>: P(Negative) = 0.62, P(Neutral) = 0.30, P(Positive) = 0.08."]}, {"h": "The worked example, step by step", "body": ["First, check the distribution sums to one: 0.62 + 0.30 + 0.08 = <strong>1.00</strong>. A softmax always sums to 1 — if your three numbers don't, something is wrong before you start."]}, {"h": "The worked example, step by step", "body": ["Predicted class = argmax = <strong>Negative</strong>, because 0.62 is the largest of the three. Confidence = max probability = <strong>0.62</strong>."]}, {"h": "The worked example, step by step", "body": ["And 0.62 is a weak kind of confident. ADAM's review threshold is 0.80 — any paragraph whose confidence is below 0.80 goes to a human for review. This paragraph, at 0.62, <strong>routes to review</strong>, even though its predicted class is clear. A confident-sounding label and a low confidence number can live in the same output."], "visual": "finbert-bar"}]}, {"body": ["FinBERT's strength is <strong>semantic context</strong>: it reads “not expected to face a loss” as reassurance, not as a loss. On the worked example it correctly leans Negative where a dictionary would merely count words. In ADAM's preliminary results it beats the LM dictionary clearly on sentiment (60.7% accuracy vs 37.3% — preliminary, validation ongoing).", "Its limits are just as clear. <strong>Lower direct traceability:</strong> you get probabilities, not a word-by-word receipt. And <strong>no disclosure context on its own:</strong> FinBERT cannot tell you whether the language is new or carried over from last year, common across the sector or specific to this firm, specific or boilerplate. It answers “what is the tone?” — it does not answer “how informative is this language here and now?”", "That is the honest boundary of a sentiment model, however good it is. To cross it you need temporal and peer context — and something to coordinate the evidence. That something is Episode 4."], "game": {"done": "Argmax for the label, max probability for the confidence, threshold for the routing. That is the whole FinBERT output in three moves.", "groups": [{"a": 0, "hint": "Argmax: 0.62 is the largest of the three.", "label": "The predicted class is", "options": ["Negative", "Neutral", "Positive"]}, {"a": 0, "hint": "Confidence is the max probability — the winning number itself.", "label": "The confidence is", "options": ["0.62", "1.00", "0.30"]}, {"a": 0, "hint": "0.62 is below 0.80 — below the line means a human looks at it.", "label": "With ADAM's 0.80 threshold, this paragraph", "options": ["Routes to human review", "Is decided automatically", "Is discarded"]}], "intro": "Same sentence, same probabilities — but now you call it. Build the verdict, slot by slot.", "sentence": "Negative at 0.62 confidence — below the 0.80 line, so it routes to review.", "title": "Dr. K Challenge: Read FinBERT's mind", "type": "build"}, "h": "What FinBERT can and cannot do", "tip": "Never ask a sentiment model a question it was not built to answer. “Is this paragraph new?” is not a sentiment question — and FinBERT will happily give you a sentiment answer anyway.", "pages": [{"h": "What FinBERT can and cannot do", "body": ["FinBERT's strength is <strong>semantic context</strong>: it reads “not expected to face a loss” as reassurance, not as a loss. On the worked example it correctly leans Negative where a dictionary would merely count words. In ADAM's preliminary results it beats the LM dictionary clearly on sentiment (60.7% accuracy vs 37.3% — preliminary, validation ongoing)."]}, {"h": "What FinBERT can and cannot do", "body": ["Its limits are just as clear. <strong>Lower direct traceability:</strong> you get probabilities, not a word-by-word receipt. And <strong>no disclosure context on its own:</strong> FinBERT cannot tell you whether the language is new or carried over from last year, common across the sector or specific to this firm, specific or boilerplate. It answers “what is the tone?” — it does not answer “how informative is this language here and now?”"]}, {"h": "What FinBERT can and cannot do", "body": ["That is the honest boundary of a sentiment model, however good it is. To cross it you need temporal and peer context — and something to coordinate the evidence. That something is Episode 4."]}]}], "n": 3, "outro": "FinBERT reads context beautifully — and still can't tell you if the language is new, boilerplate, or firm-specific. That's a different question, and it needs a different machine. Next: ADAM, where LM and FinBERT stop arguing and start presenting evidence.", "quiz": [{"a": 0, "opts": ["Negative, confidence 0.62", "Neutral, confidence 0.30", "Positive, confidence 0.08", "Negative, confidence 1.00"], "q": "FinBERT returns P(Negative) = 0.62, P(Neutral) = 0.30, P(Positive) = 0.08. What is the predicted class and the confidence?", "why": "Predicted class = argmax = Negative (0.62 is the largest of the three); confidence = max probability = 0.62. The three probabilities sum to 1.00, but the confidence is the largest single value, not the sum. In short: Negative, confidence 0.62."}, {"a": 0, "opts": ["It routes to human review, because 0.62 is below the 0.80 threshold", "It is decided automatically, because Negative won", "It is discarded as too uncertain to use", "It is sent back to FinBERT for a second run"], "q": "Under ADAM's review threshold, what happens to this paragraph (confidence 0.62)?", "why": "ADAM routes any paragraph with confidence below 0.80 to human review. At 0.62 this paragraph goes to review even though its predicted class (Negative) is clear — a clear label and a low confidence can coexist."}, {"a": 0, "opts": ["It reads semantic context, but with lower direct traceability and no temporal/peer context of its own", "It is fully transparent and auditable, word by word", "It knows whether language is new or boilerplate", "It replaces the need for any human review"], "q": "What is FinBERT's main strength over the LM dictionary — and its main limit?", "why": "FinBERT's strength is semantic context: it reads the whole sentence — word order, negation, context — which LM cannot do. But you get probabilities rather than a word-by-word receipt, and FinBERT alone cannot tell you if language is new, peer-common, or boilerplate. That context question is what ADAM's Context &amp; Quality Agent answers."}], "tags": ["FinBERT", "Softmax", "Confidence 0.62"], "title": "FinBERT Reads Context"}, {"badge": "Adjudicator Badge", "blurb": "Dr. K hosts the finale: ADAM — the agentic system that uses BOTH LM and FinBERT, plus an LLM as adjudicator. Six layers, three evidence agents, six discrepancy diagnoses — and preliminary results you must read with the label on.", "chapter": "ADAM · DSI 2026", "host": "Dr. K", "intro": "<p>Dr. K saved the real idea for last — well, almost last: one episode follows this one, and it is about the study itself. ADAM doesn't pick a winner between LM and FinBERT — it keeps their disagreement, diagnoses it, and hands you a decision. This episode, you become the adjudicator. And remember: every number here is preliminary. Validation is ongoing, and honest science says so on the label.</p>", "lessons": [{"body": ["ADAM — An Agentic Decision Support System for Financial Narratives, by Kazim Topuz, Jessica Bedson, Tally Ferguson, and Thomas Kim (University of Tulsa, DSI 2026) — is built on one idea: <strong>preserve disagreement, diagnose it, and turn it into decision-relevant evidence</strong>. It is not a three-vote ensemble, and it is not “an LLM does everything”. It is six layers, three specialized evidence agents, and an adjudicator that reasons about their evidence.", "The six layers: <strong>1 — Disclosure &amp; Decision Context</strong> (10-K Item 1A / Item 7, firm / year / section / sector); <strong>2 — Structuring &amp; Contextualization</strong> (section extraction, paragraph objects, prior-year / peer links); <strong>3 — Three Specialized Evidence Agents</strong> (LM, FinBERT, Context &amp; Quality); <strong>4 — Intelligent Adjudication</strong> (assess convergence, diagnose conflict, retain ambiguity); <strong>5 — Disclosure Intelligence Synthesis</strong> (paragraph → section → company-year measures); <strong>6 — Decision-Support Outputs</strong> (profiles, alerts, drill-down, explanations).", "The three agents are deliberately non-equivalent. The <strong>LM lexicon agent</strong> gives transparent, auditable word evidence — Positive / Negative, Uncertainty, Litigious, Constraining, Modal — but is context-blind. The <strong>FinBERT agent</strong> gives finance-domain contextual sentiment — P(Negative), P(Neutral), P(Positive), predicted class, confidence — but with lower traceability. The <strong>Context &amp; Quality agent</strong> does not decide sentiment at all: it qualifies informational significance — persistence / novelty, peer similarity / distinctiveness, specificity, boilerplate, hedging / negation / caution. The outputs stay separate until adjudication."], "h": "ADAM: six layers, three agents, one adjudicator", "tip": "Agentic here does not mean every component is an LLM. It means specialized roles, structured evidence, and explicit coordination. If someone calls ADAM “just an LLM”, ask them where the Context &amp; Quality evidence lives.", "pages": [{"h": "ADAM: six layers, three agents, one adjudicator", "body": ["ADAM — An Agentic Decision Support System for Financial Narratives, by Kazim Topuz, Jessica Bedson, Tally Ferguson, and Thomas Kim (University of Tulsa, DSI 2026) — is built on one idea: <strong>preserve disagreement, diagnose it, and turn it into decision-relevant evidence</strong>. It is not a three-vote ensemble, and it is not “an LLM does everything”. It is six layers, three specialized evidence agents, and an adjudicator that reasons about their evidence."]}, {"h": "ADAM: six layers, three agents, one adjudicator", "body": ["The six layers: <strong>1 — Disclosure &amp; Decision Context</strong> (10-K Item 1A / Item 7, firm / year / section / sector); <strong>2 — Structuring &amp; Contextualization</strong> (section extraction, paragraph objects, prior-year / peer links); <strong>3 — Three Specialized Evidence Agents</strong> (LM, FinBERT, Context &amp; Quality); <strong>4 — Intelligent Adjudication</strong> (assess convergence, diagnose conflict, retain ambiguity); <strong>5 — Disclosure Intelligence Synthesis</strong> (paragraph → section → company-year measures); <strong>6 — Decision-Support Outputs</strong> (profiles, alerts, drill-down, explanations)."]}, {"h": "ADAM: six layers, three agents, one adjudicator", "body": ["The three agents are deliberately non-equivalent. The <strong>LM lexicon agent</strong> gives transparent, auditable word evidence — Positive / Negative, Uncertainty, Litigious, Constraining, Modal — but is context-blind. The <strong>FinBERT agent</strong> gives finance-domain contextual sentiment — P(Negative), P(Neutral), P(Positive), predicted class, confidence — but with lower traceability. The <strong>Context &amp; Quality agent</strong> does not decide sentiment at all: it qualifies informational significance — persistence / novelty, peer similarity / distinctiveness, specificity, boilerplate, hedging / negation / caution. The outputs stay separate until adjudication."]}]}, {"body": ["The adjudicator separates what other systems collapse. It returns separate fields: <strong>linguistic sentiment</strong> (Positive / Negative / Neutral), <strong>economic direction</strong> (Favorable / Adverse / Mixed / No clear direction), <strong>informativeness</strong> (High / Medium / Low), and <strong>status</strong> — confidence, ambiguity, review needed. A sentence can be linguistically neutral, economically adverse, and highly informative, all at once — and ADAM is designed to preserve those distinctions.", "When the agents disagree, the adjudicator diagnoses why, using six primary discrepancy categories: <strong>No meaningful conflict; Lexical–semantic mismatch; Boilerplate / generic language; Factual event vs neutral wording; Conditional / negated / mixed language; Unresolved evidence.</strong> Market outcomes are not observed by the adjudicator — they are reserved for external validation.", "A worked disagreement (illustrative passage): “The company is not expected to face a material loss from the pending litigation this year.” LM says <strong>NEGATIVE</strong> — it matched the list words “loss” and “litigation”. FinBERT says <strong>NEUTRAL</strong> — it read “not expected to” as negation. The adjudicator's diagnosis: <strong>conditional / negated language</strong> — the disagreement is resolvable once the negation is seen, and the paragraph is not the distress signal LM's count suggests.", "How hard is the underlying task? The human reference set — <strong>300 paragraphs</strong> (144 Item 1A, 156 Item 7, 2016–2025, all 11 sectors), each reviewed independently by <strong>3 blinded reviewers</strong> — shows it is genuinely difficult: unanimous agreement was only <strong>21%</strong> for sentiment, <strong>25%</strong> for economic direction, and <strong>32%</strong> for informativeness. Most of the rest had a two-of-three majority. Disagreement here is not annotation noise — it is a signal of task difficulty."], "h": "Adjudication: four constructs, six diagnoses", "tip": "Agreement does not guarantee correctness, and disagreement does not necessarily imply ambiguity. The adjudicator's first question is always: do the signals converge — and if not, what explains the conflict?", "pages": [{"h": "Adjudication: four constructs, six diagnoses", "body": ["The adjudicator separates what other systems collapse. It returns separate fields: <strong>linguistic sentiment</strong> (Positive / Negative / Neutral), <strong>economic direction</strong> (Favorable / Adverse / Mixed / No clear direction), <strong>informativeness</strong> (High / Medium / Low), and <strong>status</strong> — confidence, ambiguity, review needed. A sentence can be linguistically neutral, economically adverse, and highly informative, all at once — and ADAM is designed to preserve those distinctions."]}, {"h": "Adjudication: four constructs, six diagnoses", "body": ["When the agents disagree, the adjudicator diagnoses why, using six primary discrepancy categories: <strong>No meaningful conflict; Lexical–semantic mismatch; Boilerplate / generic language; Factual event vs neutral wording; Conditional / negated / mixed language; Unresolved evidence.</strong> Market outcomes are not observed by the adjudicator — they are reserved for external validation."]}, {"h": "Adjudication: four constructs, six diagnoses", "body": ["A worked disagreement (illustrative passage): “The company is not expected to face a material loss from the pending litigation this year.” LM says <strong>NEGATIVE</strong> — it matched the list words “loss” and “litigation”. FinBERT says <strong>NEUTRAL</strong> — it read “not expected to” as negation. The adjudicator's diagnosis: <strong>conditional / negated language</strong> — the disagreement is resolvable once the negation is seen, and the paragraph is not the distress signal LM's count suggests."]}, {"h": "Adjudication: four constructs, six diagnoses", "body": ["How hard is the underlying task? The human reference set — <strong>300 paragraphs</strong> (144 Item 1A, 156 Item 7, 2016–2025, all 11 sectors), each reviewed independently by <strong>3 blinded reviewers</strong> — shows it is genuinely difficult: unanimous agreement was only <strong>21%</strong> for sentiment, <strong>25%</strong> for economic direction, and <strong>32%</strong> for informativeness. Most of the rest had a two-of-three majority. Disagreement here is not annotation noise — it is a signal of task difficulty."]}]}, {"body": ["Every number in this lesson is labelled <strong>PRELIMINARY — VALIDATION ONGOING</strong>: the evaluation uses the 300-paragraph human reference set, and confirmatory testing, confidence intervals, and paired significance tests are still to come in the final paper.", "Linguistic sentiment accuracy: LM 37.3%, FinBERT 60.7%, LM–FinBERT ensemble 58.7%, ADAM 82.7%. Macro-F1: LM 0.320, FinBERT 0.529, ensemble 0.384, ADAM 0.745. Economic direction: ADAM 83.3% accuracy, macro-F1 0.689. Disclosure informativeness: ADAM 71.4% accuracy, macro-F1 0.607 — the hardest of the three constructs, and the one with the most room to improve.", "The key analysis is disagreement. LM and FinBERT disagree on <strong>162 of 300 paragraphs (54%)</strong>. There, ADAM reaches <strong>76.5%</strong> accuracy (macro-F1 0.703), vs FinBERT 68.5% (0.606), ensemble 64.8%, and LM 25.3%. And on the 77 paragraphs where both base models were wrong, ADAM is correct on <strong>89.6%</strong>.", "The ablation asks whether the architecture matters or the LLM does all the work — same adjudicator, progressively more evidence. Informativeness macro-F1: Judge-only (paragraph only) 0.453 → Base evidence (paragraph + LM + FinBERT) 0.469 → Full ADAM (+ Context &amp; Quality) 0.607. The gains are Δ <strong>+.138</strong> vs Base and <strong>+.154</strong> vs Judge-only, both statistically significant. But be honest about the rest: for sentiment, Judge-only already reaches 82.0% (vs Full ADAM 82.7%), and for economic direction Judge-only reaches 84.0% — slightly above Full ADAM's 83.3%. The architecture matters most where the construct depends on information outside the focal paragraph: prior filings, peer language, persistence, novelty, specificity.", "Decision support is the payoff, not the accuracy. ADAM's High-informativeness flag: <strong>81.0% precision, 69.9% recall</strong> — vs a simple FinBERT-negative rule at <strong>19.5% precision</strong> for High informativeness (the proxy trap). Confidence routing: confidence below 0.80 sends <strong>56%</strong> of paragraphs to review, captures <strong>92.3%</strong> of ADAM's sentiment errors, and accuracy on the automated remainder rises to <strong>97.0%</strong>. The DSS value is selective attention + traceability + review routing — not simply a higher sentiment score."], "game": {"done": "LM matched a negative word, FinBERT read the negation — and you diagnosed it instead of averaging it away. That is adjudication.", "groups": [{"a": 0, "hint": "LM only sees words on its lists — check which words it matched.", "label": "LM flags the passage NEGATIVE because", "options": ["It matched the negative list words “loss” and “litigation”", "It read the sentence as a real loss", "It found language repeated from last year"]}, {"a": 0, "hint": "FinBERT reads the whole sentence — what does “not” do to the words after it?", "label": "FinBERT says NEUTRAL because", "options": ["It read “not expected to” as negation", "It ignores negative words entirely", "It only reads Item 8"]}, {"a": 0, "hint": "One of the six discrepancy categories names negation explicitly.", "label": "The adjudicator diagnoses this as", "options": ["Conditional / negated / mixed language", "No meaningful conflict", "Unresolved evidence"]}], "intro": "One passage, two models, opposite verdicts. The passage (illustrative): “The company is not expected to face a material loss from the pending litigation this year.” LM says NEGATIVE. FinBERT says NEUTRAL. You be the adjudicator — build the diagnosis.", "sentence": "LM matched a negative word, FinBERT read the negation — the adjudicator calls it conditional / negated language.", "title": "Dr. K Challenge: You be the adjudicator", "type": "build"}, "h": "Preliminary results — read the label first", "tip": "The most important number on this page is not 82.7%. It is the label above it: PRELIMINARY. A decision-support system that hides its uncertainty is selling false precision — the exact failure ADAM was built to avoid.", "visual": "adam-results", "visual2": "adam-decision", "visual2_page": 2, "visual3": "adam-ablation", "visual3_page": 3, "visual_page": 1, "pages": [{"h": "Preliminary results — read the label first", "body": ["Every number in this lesson is labelled <strong>PRELIMINARY — VALIDATION ONGOING</strong>: the evaluation uses the 300-paragraph human reference set, and confirmatory testing, confidence intervals, and paired significance tests are still to come in the final paper."]}, {"h": "Preliminary results — read the label first", "body": ["Linguistic sentiment accuracy: LM 37.3%, FinBERT 60.7%, LM–FinBERT ensemble 58.7%, ADAM 82.7%. Macro-F1: LM 0.320, FinBERT 0.529, ensemble 0.384, ADAM 0.745. Economic direction: ADAM 83.3% accuracy, macro-F1 0.689. Disclosure informativeness: ADAM 71.4% accuracy, macro-F1 0.607 — the hardest of the three constructs, and the one with the most room to improve."], "visual": "adam-results"}, {"h": "Preliminary results — read the label first", "body": ["The key analysis is disagreement. LM and FinBERT disagree on <strong>162 of 300 paragraphs (54%)</strong>. There, ADAM reaches <strong>76.5%</strong> accuracy (macro-F1 0.703), vs FinBERT 68.5% (0.606), ensemble 64.8%, and LM 25.3%. And on the 77 paragraphs where both base models were wrong, ADAM is correct on <strong>89.6%</strong>."], "visual": "adam-decision"}, {"h": "Preliminary results — read the label first", "body": ["The ablation asks whether the architecture matters or the LLM does all the work — same adjudicator, progressively more evidence. Informativeness macro-F1: Judge-only (paragraph only) 0.453 → Base evidence (paragraph + LM + FinBERT) 0.469 → Full ADAM (+ Context &amp; Quality) 0.607. The gains are Δ <strong>+.138</strong> vs Base and <strong>+.154</strong> vs Judge-only, both statistically significant. But be honest about the rest: for sentiment, Judge-only already reaches 82.0% (vs Full ADAM 82.7%), and for economic direction Judge-only reaches 84.0% — slightly above Full ADAM's 83.3%. The architecture matters most where the construct depends on information outside the focal paragraph: prior filings, peer language, persistence, novelty, specificity."], "visual": "adam-ablation"}, {"h": "Preliminary results — read the label first", "body": ["Decision support is the payoff, not the accuracy. ADAM's High-informativeness flag: <strong>81.0% precision, 69.9% recall</strong> — vs a simple FinBERT-negative rule at <strong>19.5% precision</strong> for High informativeness (the proxy trap). Confidence routing: confidence below 0.80 sends <strong>56%</strong> of paragraphs to review, captures <strong>92.3%</strong> of ADAM's sentiment errors, and accuracy on the automated remainder rises to <strong>97.0%</strong>. The DSS value is selective attention + traceability + review routing — not simply a higher sentiment score."]}]}], "n": 4, "outro": "You can now read the results — but can you explain how they were earned? One episode left: the study itself. The research questions, the nested tests, and why holding the adjudicator constant is the whole trick.", "quiz": [{"a": 1, "opts": ["A three-vote ensemble of LM, FinBERT, and an LLM", "An agentic system: specialized evidence agents plus an adjudicator that reasons about their evidence", "An LLM that reads 10-Ks on its own", "A readability score for Item 1A and Item 7"], "q": "ADAM is best described as…", "why": "ADAM is an agentic system: it coordinates heterogeneous evidence through six layers and an adjudicator — it is explicitly not a three-vote ensemble, and “agentic” means specialized roles plus structured evidence and explicit coordination, not that every component is an LLM."}, {"a": 0, "opts": ["Informativeness macro-F1 rises 0.453 (judge-only) → 0.469 (base) → 0.607 (full ADAM), Δ +.138 / +.154, significant", "Sentiment accuracy rises from 37.3% to 82.7%", "Judge-only beats Full ADAM on economic direction (84.0% vs 83.3%)", "FinBERT beats LM on sentiment (60.7% vs 37.3%)"], "q": "In the ablation test, what proves the architecture itself matters — rather than the LLM doing all the work?", "why": "Holding the adjudicator constant, adding Context &amp; Quality evidence lifts informativeness macro-F1 from 0.453 to 0.607 — the architectural gain, and it is significant. For sentiment and direction the judge alone already does most of the work (82.0% / 84.0%), so the honest claim is task-dependent: the architecture matters for informativeness."}, {"a": 0, "opts": ["19.5% precision — negative sentiment is a poor proxy for informativeness (the proxy trap)", "69.9% precision — about the same as ADAM", "97.0% precision — it beats ADAM", "56% precision — it routes too much to review"], "q": "ADAM's High-informativeness flag has 81.0% precision. What does the simple FinBERT-negative rule achieve for High informativeness — and what does that show?", "why": "The FinBERT-negative rule reaches only 19.5% precision for High informativeness, vs ADAM's 81.0% (with 69.9% recall). Negative tone is a bad proxy for “this paragraph matters” — which is exactly why ADAM separates sentiment from informativeness instead of collapsing them."}], "tags": ["6 layers", "3 agents", "Preliminary results"], "title": "ADAM: Disagreement as Evidence"}, {"badge": "Design Scientist Badge", "blurb": "Dr. K hosts the finale: the study itself — four research questions, four design requirements, a 300-paragraph human reference set, and nested tests that hold the adjudicator constant. No new scores here: learn to explain the method, not just quote the results.", "chapter": "Slides 5 · 10–13 · 19–20", "host": "Dr. K", "intro": "<p>Dr. K here, and this last episode is about the study itself — not the scores, but how they were earned. If you can explain the method, you can defend the result. And if you can't, the result isn't worth much. Four questions, four requirements, one human reference set, and a nested test that keeps the adjudicator honest.</p>", "lessons": [{"body": ["ADAM began as four research questions — and four design requirements built to answer them. The alignment is deliberate: each question has a requirement that forces the design to take it seriously.", "<strong>RQ1</strong> — How can a DSS coordinate lexicon, transformer, and contextual-quality evidence? <strong>RQ2</strong> — Does agentic adjudication improve interpretation, and is the gain architectural? <strong>RQ3</strong> — What explains disagreement, and does it identify passages needing review? <strong>RQ4</strong> — Are confidence-aware outputs useful for prioritization and economically relevant?", "The four design requirements: <strong>DR1</strong> — Preserve heterogeneous evidence. <strong>DR2</strong> — Diagnose disagreement. <strong>DR3</strong> — Qualify signals with temporal / disclosure context. <strong>DR4</strong> — Maintain traceability to source text. RQ1 is the design question; RQ2 asks whether the architecture adds value beyond its components; RQ3 treats disagreement as a diagnostic phenomenon; RQ4 moves from predictive accuracy to decision-support behaviour and economic relevance."], "h": "Four questions, four requirements", "tip": "A design-science study is judged by its questions and its requirements, not only by its accuracy table. Keep RQ2 in mind all episode — it is the question the whole evaluation is built to answer.", "pages": [{"h": "Four questions, four requirements", "body": ["ADAM began as four research questions — and four design requirements built to answer them. The alignment is deliberate: each question has a requirement that forces the design to take it seriously."]}, {"h": "Four questions, four requirements", "body": ["<strong>RQ1</strong> — How can a DSS coordinate lexicon, transformer, and contextual-quality evidence? <strong>RQ2</strong> — Does agentic adjudication improve interpretation, and is the gain architectural? <strong>RQ3</strong> — What explains disagreement, and does it identify passages needing review? <strong>RQ4</strong> — Are confidence-aware outputs useful for prioritization and economically relevant?"]}, {"h": "Four questions, four requirements", "body": ["The four design requirements: <strong>DR1</strong> — Preserve heterogeneous evidence. <strong>DR2</strong> — Diagnose disagreement. <strong>DR3</strong> — Qualify signals with temporal / disclosure context. <strong>DR4</strong> — Maintain traceability to source text. RQ1 is the design question; RQ2 asks whether the architecture adds value beyond its components; RQ3 treats disagreement as a diagnostic phenomenon; RQ4 moves from predictive accuracy to decision-support behaviour and economic relevance."]}]}, {"body": ["The empirical setting: 55 firms, five from each of 11 GICS sectors, over 2016–2025 — 550 firm-year 10-Ks. The focal paragraphs come from Item 1A and Item 7: 179,623 in total (94,031 Item 1A + 85,592 Item 7). Filings from 2014–2015 (32,407 paragraphs) are used only as historical context, to initialize the longitudinal measures — so the system can tell what is new from what is carried over. (Slide 10 also prints “143,372 focal paragraphs”; the Item counts sum to 179,623, the figure used here and in Episode 1.)", "The primary unit is the paragraph — the contextualized paragraph object, linked to firm, year, section, sector, prior-year context, peer context, and provenance. ADAM focuses on Item 1A and Item 7 because they are narrative-heavy but have different linguistic baselines.", "The evaluation rests on a human reference set: 300 paragraphs (144 Item 1A, 156 Item 7, 2016–2025, all 11 sectors), each independently reviewed by 3 reviewers who were blinded to all LM, FinBERT, and ADAM outputs. Review packets included the target paragraph, surrounding text when available, and relevant prior-year context — but no model outputs. Each reviewer annotated four constructs: linguistic sentiment, economic direction, disclosure informativeness, and interpretive ambiguity.", "The headline finding about the humans: unanimous agreement was only 21% for sentiment, 25% for economic direction, and 32% for informativeness. Most of the rest had a two-of-three majority. Interpretive disagreement is not only annotation noise — it becomes an empirical signal of task difficulty. Chance-corrected reliability statistics are to be reported in the final manuscript."], "h": "The data and the human reference set", "tip": "If three careful humans agree unanimously only one time in five, a model that claims 99% certainty on this task is not confident — it is overconfident. That is why ADAM routes its uncertainty to review instead of hiding it.", "pages": [{"h": "The data and the human reference set", "body": ["The empirical setting: 55 firms, five from each of 11 GICS sectors, over 2016–2025 — 550 firm-year 10-Ks. The focal paragraphs come from Item 1A and Item 7: 179,623 in total (94,031 Item 1A + 85,592 Item 7). Filings from 2014–2015 (32,407 paragraphs) are used only as historical context, to initialize the longitudinal measures — so the system can tell what is new from what is carried over. (Slide 10 also prints “143,372 focal paragraphs”; the Item counts sum to 179,623, the figure used here and in Episode 1.)"]}, {"h": "The data and the human reference set", "body": ["The primary unit is the paragraph — the contextualized paragraph object, linked to firm, year, section, sector, prior-year context, peer context, and provenance. ADAM focuses on Item 1A and Item 7 because they are narrative-heavy but have different linguistic baselines."]}, {"h": "The data and the human reference set", "body": ["The evaluation rests on a human reference set: 300 paragraphs (144 Item 1A, 156 Item 7, 2016–2025, all 11 sectors), each independently reviewed by 3 reviewers who were blinded to all LM, FinBERT, and ADAM outputs. Review packets included the target paragraph, surrounding text when available, and relevant prior-year context — but no model outputs. Each reviewer annotated four constructs: linguistic sentiment, economic direction, disclosure informativeness, and interpretive ambiguity."]}, {"h": "The data and the human reference set", "body": ["The headline finding about the humans: unanimous agreement was only 21% for sentiment, 25% for economic direction, and 32% for informativeness. Most of the rest had a two-of-three majority. Interpretive disagreement is not only annotation noise — it becomes an empirical signal of task difficulty. Chance-corrected reliability statistics are to be reported in the final manuscript."]}]}, {"body": ["The evaluation separates two questions: how good is ADAM versus established methods — and does any gain come from the architecture rather than from putting an LLM at the end? The nested tests hold the adjudicator constant and progressively add structured evidence: LM dictionary (lexical baseline); FinBERT (contextual baseline); LM + FinBERT simple non-agentic ensemble; Judge-only (same adjudicator, paragraph only); Base evidence (paragraph + LM + FinBERT); Full ADAM (+ Context &amp; Quality evidence).", "What is evaluated: accuracy + macro-F1, class-level precision / recall, agreement vs disagreement cases, adjudicator resolution behaviour, human-disagreement / review-needed alignment, and external financial validation. The nested design is the point: Judge-only tells you what the LLM can do by itself, so any gain from Base or Full ADAM has to come from the evidence and the architecture — not from a better LLM.", "The contributions come in three buckets. <strong>DSS design:</strong> a modular architecture for coordinating heterogeneous analytical evidence while preserving traceability and uncertainty. <strong>Conceptual:</strong> treat model disagreement as potentially diagnostic evidence — not merely noise or a failure to be averaged away. <strong>Evaluation:</strong> combine human reference labels, conventional benchmarks, nested ablations, disagreement analysis, and external validation.", "The logic generalizes beyond SEC filings: the same evidence-coordination logic can apply whenever multiple analytical methods read complex narratives differently — regulatory, legal, clinical, cybersecurity, or operational text. The design-science framing follows Hevner et al. (2004), with Gregor &amp; Hevner (2013). Next steps: finalize the Context &amp; Quality Agent operationalization, confirmatory validation, disagreement analysis, and architecture ablations."], "game": {"buckets": ["Judge-only", "Base evidence", "Full ADAM"], "done": "Six arms, one adjudicator held constant — that is how you separate the architecture's work from the LLM's work.", "hint": "Not quite — ask what evidence the adjudicator was given: paragraph only, paragraph + two agents, or everything?", "intro": "Six evaluation arms, one adjudicator held constant. Sort each setup into the arm it belongs to.", "items": [{"b": 0, "t": "The adjudicator reads the paragraph alone — no LM scores, no FinBERT probabilities, no context.", "why": "Paragraph only, same adjudicator. This is the “what can the LLM do by itself?” arm."}, {"b": 1, "t": "Paragraph + LM + FinBERT evidence, but nothing about novelty, persistence, or peers.", "why": "Base evidence adds the two sentiment agents but not the Context & Quality Agent."}, {"b": 2, "t": "Paragraph + LM + FinBERT + Context & Quality evidence — the complete system.", "why": "Full ADAM is the complete architecture; the jump from Base to Full is the architecture test."}, {"b": 0, "t": "Same adjudicator, same paragraph — but the paragraph is the only thing in the room.", "why": "Still paragraph only. If this arm already scores 82% on sentiment, the LLM is doing most of that work."}], "title": "Dr. K Challenge: Which evaluation arm is this?", "type": "sort"}, "h": "The evaluation design — and what the study contributes", "tip": "Judge-only is the most honest control in the whole study. Without it, every gain could be credited to the architecture when it really belongs to the LLM.", "pages": [{"h": "The evaluation design — and what the study contributes", "body": ["The evaluation separates two questions: how good is ADAM versus established methods — and does any gain come from the architecture rather than from putting an LLM at the end? The nested tests hold the adjudicator constant and progressively add structured evidence: LM dictionary (lexical baseline); FinBERT (contextual baseline); LM + FinBERT simple non-agentic ensemble; Judge-only (same adjudicator, paragraph only); Base evidence (paragraph + LM + FinBERT); Full ADAM (+ Context &amp; Quality evidence)."]}, {"h": "The evaluation design — and what the study contributes", "body": ["What is evaluated: accuracy + macro-F1, class-level precision / recall, agreement vs disagreement cases, adjudicator resolution behaviour, human-disagreement / review-needed alignment, and external financial validation. The nested design is the point: Judge-only tells you what the LLM can do by itself, so any gain from Base or Full ADAM has to come from the evidence and the architecture — not from a better LLM."]}, {"h": "The evaluation design — and what the study contributes", "body": ["The contributions come in three buckets. <strong>DSS design:</strong> a modular architecture for coordinating heterogeneous analytical evidence while preserving traceability and uncertainty. <strong>Conceptual:</strong> treat model disagreement as potentially diagnostic evidence — not merely noise or a failure to be averaged away. <strong>Evaluation:</strong> combine human reference labels, conventional benchmarks, nested ablations, disagreement analysis, and external validation."]}, {"h": "The evaluation design — and what the study contributes", "body": ["The logic generalizes beyond SEC filings: the same evidence-coordination logic can apply whenever multiple analytical methods read complex narratives differently — regulatory, legal, clinical, cybersecurity, or operational text. The design-science framing follows Hevner et al. (2004), with Gregor &amp; Hevner (2013). Next steps: finalize the Context &amp; Quality Agent operationalization, confirmatory validation, disagreement analysis, and architecture ablations."]}]}], "n": 5, "outro": "That's the whole quest — and the three takeaways to carry out the door: (1) Different models see different evidence — do not collapse that evidence too early. (2) Disagreement can be diagnostically useful — ask why methods diverge, and whether the conflict is resolvable. (3) Decision support is more than accuracy — traceability, uncertainty, context, and human attention are part of the output. You can now explain the study, not just quote its scores. Go read a disclosure like an adjudicator.", "quiz": [{"a": 0, "opts": ["To separate whether the architecture adds value from whether the LLM alone does the work", "To test six different LLMs against each other", "To make the accuracy numbers higher", "To compare Item 1A against Item 7"], "q": "Why does ADAM's evaluation use nested tests that hold the adjudicator constant?", "why": "Holding the adjudicator constant while progressively adding evidence separates whether the architecture adds value from whether the LLM alone does the work. Judge-only shows what the LLM does by itself (82.0% sentiment, 84.0% direction); only gains above that can be credited to the evidence and the architecture. Testing different LLMs or comparing sections is not what the nested design does."}, {"a": 1, "opts": ["Judge-only", "Base evidence", "Full ADAM", "LM + FinBERT ensemble"], "q": "Which evaluation arm gives the adjudicator the paragraph plus LM and FinBERT evidence, but NO Context & Quality evidence?", "why": "Base evidence is paragraph + LM + FinBERT. Judge-only is the paragraph alone; Full ADAM adds the Context & Quality evidence; the LM + FinBERT ensemble is a simple non-agentic combination with no adjudicator at all."}, {"a": 0, "opts": ["The task is genuinely difficult, and interpretive disagreement is a signal of task difficulty, not only annotation noise", "The reviewers were not blinded properly", "Sentiment labels should be dropped from ADAM", "The 300-paragraph set is too small to use"], "q": "Reviewers agreed unanimously on only 21% of paragraphs for sentiment. What does the study conclude from this?", "why": "Unanimous agreement was only 21% for sentiment, 25% for direction, and 32% for informativeness — and the study treats that as evidence the task is genuinely interpretive, with disagreement as a signal of difficulty rather than only annotation noise. The reviewers were blinded to all model outputs, and chance-corrected reliability statistics are to be reported in the final manuscript."}], "tags": ["4 RQs · 4 DRs", "Nested evaluation", "Design science"], "title": "Our Research: The ADAM Study Itself"}];
+        var BOSSES = {};
+
+var LEVELS = [
+        { xp: 0, name: "Disclosure Rookie" },
+        { xp: 120, name: "Paragraph Detective" },
+        { xp: 240, name: "Tone Analyst" },
+        { xp: 360, name: "Context Sleuth" },
+        { xp: 480, name: "Adjudicator" },
+        { xp: 600, name: "Disclosure Intelligence Master" }
+      ];
+      var XP_LESSON = 10, XP_QUESTION = 20, XP_BONUS = 30;
+
+      /* ============================================================
+         STATE (session only)
+         ============================================================ */
+      var state = { xp: 0, cleared: {}, stars: {}, awarded: {}, current: -1, step: 0, score: 0, answered: false, page: 0, gamesDone: {} };
+
+      function $(id){ return document.getElementById(id); }
+      function epMaxXP(ep){ return ep.lessons.length * XP_LESSON + ep.quiz.length * XP_QUESTION + XP_BONUS; }
+      function isUnlocked(i){ return i === 0 || !!state.cleared[i - 1]; }
+      function levelFor(xp){
+        var cur = LEVELS[0], next = null;
+        for (var i = 0; i < LEVELS.length; i++){
+          if (xp >= LEVELS[i].xp){ cur = LEVELS[i]; next = LEVELS[i + 1] || null; }
+        }
+        return { cur: cur, next: next, idx: LEVELS.indexOf(cur) };
+      }
+
+      function updateHUD(){
+        var lv = levelFor(state.xp);
+        $("hud-level").textContent = "Level " + (lv.idx + 1) + " · " + lv.cur.name;
+        var pct = 100;
+        if (lv.next){ pct = Math.round(100 * (state.xp - lv.cur.xp) / (lv.next.xp - lv.cur.xp)); }
+        $("hud-levelbar").style.width = pct + "%";
+        $("hud-xp").textContent = state.xp + " XP";
+        var clearedCount = Object.keys(state.cleared).length;
+        $("hud-cleared").textContent = clearedCount + " / " + EPISODES.length + " cleared";
+        var firstOpen = EPISODES.findIndex(function(_, i){ return !state.cleared[i]; });
+        $("btn-start-label").textContent = firstOpen === -1 ? "Replay any episode" :
+          (clearedCount === 0 ? "Start Episode 1" : "Continue: Episode " + (firstOpen + 1));
+      }
+
+      /* ============================================================
+         EPISODE MAP
+         ============================================================ */
+      function starString(n){
+        var s = "";
+        for (var i = 0; i < 3; i++){ s += '<span class="' + (i < n ? "on" : "") + '">★</span>'; }
+        return s;
+      }
+      function renderTrail(){
+        var html = "";
+        EPISODES.forEach(function(ep, i){
+          var unlocked = isUnlocked(i), cleared = !!state.cleared[i];
+          var status = cleared ? '<span class="status-pill done">Cleared</span>'
+            : unlocked ? '<span class="status-pill now">Now playing</span>'
+            : '<span class="status-pill lock">Locked</span>';
+          html += '<article class="ep ' + (cleared ? "cleared" : unlocked ? "" : "locked") + '">' +
+            '<div class="ep-medal" aria-hidden="true"><span><small>EP</small><span class="n">' + ep.n + '</span></span></div>' +
+            '<div class="ep-body"><div class="chap">' + ep.chapter + ' · ' + status.replace(/<[^>]+>/g, "") + '</div>' +
+            '<h3>' + ep.title + '</h3><p>' + ep.blurb + '</p>' +
+            '<div class="ep-tags">' + ep.tags.map(function(t){ return '<span class="tag">' + t + '</span>'; }).join("") + '</div></div>' +
+            '<div class="ep-side">' + status +
+            '<span class="stars" aria-label="' + (state.stars[i] || 0) + ' of 3 stars earned">' + starString(state.stars[i] || 0) + '</span>' +
+            '<span class="ep-badge">Badge: ' + ep.badge + '</span>' +
+            '<span class="ep-xp">+' + epMaxXP(ep) + ' XP</span>' +
+            (unlocked
+              ? '<button class="btn-play" type="button" data-play="' + i + '">' + (cleared ? "Replay" : "Play") +
+                ' <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg></button>'
+              : '<button class="btn-play" type="button" disabled><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg> Locked</button>') +
+            '</div></article>';
+        });
+        $("trail").innerHTML = html;
+        var btns = document.querySelectorAll("[data-play]");
+        for (var j = 0; j < btns.length; j++){
+          btns[j].addEventListener("click", function(){ openEpisode(parseInt(this.getAttribute("data-play"), 10)); });
+        }
+      }
+
+      /* ============================================================
+         PLAYER
+         ============================================================ */
+      function openEpisode(i){
+        state.current = i; state.step = 0; state.score = 0; state.answered = false; state.page = 0;
+        var ep = EPISODES[i];
+        $("p-chap").textContent = "Episode " + ep.n + " · " + ep.chapter;
+        $("p-title").textContent = ep.title;
+        $("home").style.display = "none";
+        $("player").classList.add("open");
+        window.scrollTo({ top: 0 });
+        renderStep();
+        $("p-title").setAttribute("tabindex", "-1");
+        $("p-title").focus({ preventScroll: true });
+      }
+      function exitPlayer(){
+        $("player").classList.remove("open");
+        $("home").style.display = "";
+        state.current = -1;
+        renderTrail(); updateHUD();
+        window.scrollTo({ top: 0 });
+      }
+      function totalSteps(ep){ return ep.lessons.length + ep.quiz.length; }
+      function renderDots(){
+        var ep = EPISODES[state.current], html = "";
+        for (var i = 0; i < totalSteps(ep); i++){
+          html += '<span class="dot' + (i < state.step ? " done" : i === state.step ? " now" : "") + '"></span>';
+        }
+        $("p-dots").innerHTML = html;
+      }
+      function renderStep(){
+        var ep = EPISODES[state.current];
+        renderDots();
+        if (state.step < ep.lessons.length){ if (ep.lessons[state.step].pages) renderPagedLesson(ep, state.step); else renderLesson(ep, state.step); }
+        else if (state.step < totalSteps(ep)) renderQuiz(ep, state.step - ep.lessons.length);
+        else renderResults(ep);
+      }
+      function awardXP(key, amount){
+        if (state.awarded[key]) return;
+        state.awarded[key] = true;
+        state.xp += amount;
+        updateHUD();
+      }
+      function renderLesson(ep, li){
+        var L = ep.lessons[li];
+        var last = li === ep.lessons.length - 1;
+        $("p-phase").textContent = "Phase 1 · Micro-lessons — " + (li + 1) + " of " + ep.lessons.length;
+        $("p-stage").innerHTML =
+          '<span class="lesson-kicker"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 016.5 17H20V4H6.5A2.5 2.5 0 004 6.5z"/></svg> Micro-lesson ' + (li + 1) + '</span>' +
+          '<h3>' + L.h + '</h3>' +
+          L.body.map(function(p){ return "<p>" + p + "</p>"; }).join("") +
+          '<div class="powerup"><strong>Power-up · Field tip</strong>' + L.tip + '</div>' +
+          '<div class="stage-actions">' +
+            (li > 0 ? '<button class="btn btn-ghost" id="btn-back" type="button">← Back</button>' : "") +
+            '<span class="spacer"></span><span class="xp-pop">' + (state.awarded["L" + state.current + "-" + li] ? "" : "+" + XP_LESSON + " XP") + '</span>' +
+            '<button class="btn btn-gold" id="btn-next" type="button">' + (last ? "Start the checkpoint challenge →" : "Got it — next lesson →") + '</button>' +
+          '</div>';
+        if (li > 0) $("btn-back").addEventListener("click", function(){ state.step--; renderStep(); });
+        $("btn-next").addEventListener("click", function(){
+          awardXP("L" + state.current + "-" + li, XP_LESSON);
+          state.step++; renderStep();
+        });
+      }
+      function renderQuiz(ep, qi){
+        var Q = ep.quiz[qi];
+        state.answered = false;
+        $("p-phase").textContent = "Phase 2 · Checkpoint challenge — question " + (qi + 1) + " of " + ep.quiz.length + " · Score so far: " + state.score;
+        var letters = ["A", "B", "C", "D"];
+        $("p-stage").innerHTML =
+          '<span class="quiz-kicker"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13 2L4.5 13.5H11L9.5 22 19 10h-6.5z"/></svg> Checkpoint question ' + (qi + 1) + '</span>' +
+          '<h3>' + Q.q + '</h3>' +
+          '<div class="opts" role="group" aria-label="Answer choices">' +
+          Q.opts.map(function(o, oi){
+            return '<button class="opt" type="button" data-oi="' + oi + '"><span class="letter">' + letters[oi] + '</span><span>' + o + '</span></button>';
+          }).join("") + '</div>' +
+          '<div class="feedback" id="q-feedback"></div>' +
+          '<div class="stage-actions"><span class="spacer"></span>' +
+          '<button class="btn btn-gold" id="btn-qnext" type="button" style="display:none">' +
+          (qi === ep.quiz.length - 1 ? "See my results →" : "Next question →") + '</button></div>';
+        var opts = document.querySelectorAll(".opt");
+        for (var j = 0; j < opts.length; j++){
+          opts[j].addEventListener("click", function(){ answerQuestion(this, Q, ep); });
+        }
+        $("btn-qnext").addEventListener("click", function(){ state.step++; renderStep(); });
+      }
+      function answerQuestion(btn, Q, ep){
+        if (state.answered) return;
+        state.answered = true;
+        var picked = parseInt(btn.getAttribute("data-oi"), 10);
+        var correct = picked === Q.a;
+        var opts = document.querySelectorAll(".opt");
+        for (var j = 0; j < opts.length; j++){
+          opts[j].disabled = true;
+          var oi = parseInt(opts[j].getAttribute("data-oi"), 10);
+          if (oi === Q.a) opts[j].classList.add("correct");
+          else if (oi === picked) opts[j].classList.add("wrong");
+          else opts[j].classList.add("dim");
+        }
+        var fb = $("q-feedback");
+        fb.className = "feedback show " + (correct ? "good" : "bad");
+        if (correct){
+          state.score++;
+          var qi2 = state.step - ep.lessons.length;
+          var gained = !state.awarded["Q" + state.current + "-" + qi2];
+          awardXP("Q" + state.current + "-" + qi2, XP_QUESTION);
+          fb.innerHTML = "<strong>Correct!" + (gained ? " +" + XP_QUESTION + " XP" : "") + "</strong>" + Q.why;
+        } else {
+          fb.innerHTML = "<strong>Not quite — the correct answer is highlighted.</strong>" + Q.why;
+        }
+        $("p-phase").textContent = "Phase 2 · Checkpoint challenge · Score so far: " + state.score;
+        $("btn-qnext").style.display = "";
+        $("btn-qnext").focus();
+      }
+      function renderResults(ep){
+        var firstClear = !state.cleared[state.current];
+        var stars = state.score;
+        if (firstClear){
+          state.cleared[state.current] = true;
+        }
+        // Perfect-run bonus: awarded on ANY 3/3 completion, first clear or replay.
+        // awardXP dedupes via state.awarded, so this totals exactly +30 once per episode.
+        var bonusAwarded = false;
+        if (state.score === ep.quiz.length && !state.awarded["B" + state.current]){
+          awardXP("B" + state.current, XP_BONUS);
+          bonusAwarded = true;
+        }
+        if (!state.stars[state.current] || stars > state.stars[state.current]) state.stars[state.current] = stars;
+        updateHUD();
+        $("p-phase").textContent = "Episode complete";
+        var verdict = state.score === ep.quiz.length ? "Flawless run. The checkpoint never stood a chance."
+          : state.score >= 1 ? "Checkpoint cleared. Review the explanations above any time by replaying the episode."
+          : "Checkpoint cleared — but this one deserves a rematch. Replay to earn more stars.";
+        $("p-stage").innerHTML =
+          '<div class="results">' +
+          '<span class="quiz-kicker">Episode ' + ep.n + ' cleared</span>' +
+          '<div class="big-stars" aria-label="' + stars + ' of 3 stars">' + starString(stars) + '</div>' +
+          '<h3>' + verdict + '</h3>' +
+          '<div class="score-line">Checkpoint score: ' + state.score + ' / ' + ep.quiz.length + (bonusAwarded ? ' · Perfect-run bonus +' + XP_BONUS + ' XP' : '') + '</div>' +
+          '<div><span class="badge-earned"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="9" r="6"/><path d="M8.5 14L7 22l5-3 5 3-1.5-8"/></svg> Badge earned: ' + ep.badge + '</span></div>' +
+          '<div class="score-line">Episode value: +' + epMaxXP(ep) + ' XP · Checkpoint: ' + state.score + ' / ' + ep.quiz.length + '</div>' +
+          badgeShelfHTML(ep) + certRowHTML() + shelfHTML(ep) + outroHTML(ep) +
+          '<div class="stage-actions" style="justify-content:center">' +
+            '<button class="btn btn-ghost" id="btn-replay" type="button">Replay episode</button>' +
+            '<button class="btn btn-ghost" id="btn-tomap" type="button">Back to map</button>' +
+            (state.current < EPISODES.length - 1 ? '<button class="btn btn-gold" id="btn-nextep" type="button">Next episode →</button>' : "") +
+          '</div></div>';
+        $("btn-replay").addEventListener("click", function(){ openEpisode(state.current); });
+        $("btn-tomap").addEventListener("click", exitPlayer);
+        var nx = $("btn-nextep");
+        if (nx) nx.addEventListener("click", function(){ openEpisode(state.current + 1); });
+        var cb = $("btn-cert");
+        if (cb) cb.addEventListener("click", function(){ openCert(ep); });
+        if (firstClear) confetti();
+      }
+      function confetti(){
+        if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+        var box = $("confetti"), colors = ["#f2b33d", "#0d9488", "#cf3f3f", "#f4edd9", "#4f6df5"];
+        var html = "";
+        for (var i = 0; i < 60; i++){
+          var left = Math.random() * 100;
+          var delay = (Math.random() * 0.6).toFixed(2);
+          var dur = (1.6 + Math.random() * 1.6).toFixed(2);
+          var col = colors[i % colors.length];
+          html += '<i style="left:' + left + '%;background:' + col + ';animation-delay:' + delay + 's;animation-duration:' + dur + 's"></i>';
+        }
+        box.innerHTML = html;
+        setTimeout(function(){ box.innerHTML = ""; }, 4200);
+      }
+
+
+      /* ---------- Episode 1 fun pass: paged lessons, games, badges, certificate ---------- */
+      function lessonPages(ep, li){
+        var L = ep.lessons[li];
+        if (!L.pages) return 1;
+        return L.pages.length + (L.game ? 1 : 0);
+      }
+      function renderVisual(key){
+        if (key === "dataflow") return '<div class="viz viz-flow" role="img" aria-label="Data becomes information, then a decision"><span class="viz-step">Raw data</span><span class="viz-arrow">→</span><span class="viz-step">Organized</span><span class="viz-arrow">→</span><span class="viz-step">Information</span><span class="viz-arrow">→</span><span class="viz-step">Decision</span></div>';
+        if (key === "lenses") return '<div class="viz viz-cards">' +
+          '<div class="viz-card"><b>Descriptive</b><span>What happened? Last quarter’s sales by region.</span></div>' +
+          '<div class="viz-card"><b>Predictive</b><span>What will happen? Next quarter’s demand.</span></div>' +
+          '<div class="viz-card"><b>Prescriptive</b><span>What should we do? The markdown schedule.</span></div></div>';
+        if (key === "fivevs") return '<div class="viz viz-vs">' +
+          '<span class="viz-v">Volume<span>how much</span></span>' +
+          '<span class="viz-v">Velocity<span>how fast</span></span>' +
+          '<span class="viz-v">Variety<span>how many kinds</span></span>' +
+          '<span class="viz-v">Veracity<span>how much to trust</span></span>' +
+          '<span class="viz-v gold">Value<span>what decision improves</span></span></div>';
+        if (key === "sentence") return '<div class="viz viz-sent">Should <b>owner</b> <b>decision</b>, choosing among <b>alternatives</b>, judged on <b>criteria</b>?</div>';
+        if (key === "adam-data") return window.FDI_adamData();
+        if (key === "lm-counter") return window.FDI_lmCounter();
+        if (key === "finbert-bar") return window.FDI_finbertBar();
+        if (key === "adam-results") return window.FDI_adamResults();
+        if (key === "adam-decision") return window.FDI_adamDecision();
+        if (key === "adam-ablation") return window.FDI_adamAblation();
+        return "";
+      }
+      function renderPagedLesson(ep, li){
+        var L = ep.lessons[li];
+        var total = lessonPages(ep, li);
+        var pg = state.page;
+        var lastLesson = li === ep.lessons.length - 1;
+        var isGame = !!L.game && pg >= L.pages.length;
+        var isLastPage = pg === total - 1;
+        $("p-phase").textContent = "Phase 1 · Micro-lessons — " + (li + 1) + " of " + ep.lessons.length + " · Page " + (pg + 1) + " of " + total;
+        var html = '<span class="lesson-kicker"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 19.5A2.5 2.5 0 016.5 17H20V4H6.5A2.5 2.5 0 004 6.5z"/></svg> Micro-lesson ' + (li + 1) + '</span>';
+        if (li === 0 && pg === 0 && ep.intro){
+          html += '<div class="drk-intro"><strong>A note from Dr. K</strong>' + ep.intro + '</div>';
+        }
+        if (isGame){
+          html += '<h3>' + L.game.title + '</h3><div id="game-box"></div>';
+        } else {
+          var P = L.pages[pg];
+          html += '<h3>' + P.h + '</h3>' +
+            P.body.map(function(p){ return "<p>" + p + "</p>"; }).join("") +
+            (P.visual ? renderVisual(P.visual) : "") +
+            (P.aside ? '<div class="drk-aside">' + P.aside + '</div>' : "") +
+            (pg === L.pages.length - 1 ? '<div class="powerup"><strong>' + (ep.host ? ep.host + "’s field tip" : "Power-up · Field tip") + '</strong>' + L.tip + '</div>' : "");
+        }
+        html += '<div class="stage-actions">' +
+          ((li > 0 || pg > 0) ? '<button class="btn btn-ghost" id="btn-back" type="button">← Back</button>' : "") +
+          '<span class="spacer"></span><span class="xp-pop">' + ((isLastPage && !state.awarded["L" + state.current + "-" + li]) ? "+" + XP_LESSON + " XP" : "") + '</span>' +
+          '<button class="btn btn-gold" id="btn-next" type="button">' + (isLastPage ? (lastLesson ? "Start the checkpoint challenge →" : "Got it — next lesson →") : "Next page →") + '</button>' +
+          '</div>';
+        $("p-stage").innerHTML = html;
+        if (isGame) renderGame(L.game, li);
+        var back = $("btn-back");
+        if (back) back.addEventListener("click", function(){
+          if (state.page > 0){ state.page--; }
+          else { state.step--; state.page = lessonPages(ep, state.step) - 1; }
+          renderStep();
+        });
+        $("btn-next").addEventListener("click", function(){
+          if (!isLastPage){ state.page++; renderStep(); return; }
+          awardXP("L" + state.current + "-" + li, XP_LESSON);
+          state.step++; state.page = 0; renderStep();
+        });
+      }
+      function gameKey(li){ return "G" + state.current + "-" + li; }
+      function renderGame(g, li){
+        var box = $("game-box");
+        var doneKey = gameKey(li);
+        var html = '<div class="game"><h4>' + g.title + '</h4><p class="gintro">' + g.intro + '</p>';
+        if (g.type === "sort"){
+          html += g.items.map(function(it, ii){
+            return '<div class="gitem" id="gi-' + ii + '"><span>' + it.t + '</span>' +
+              g.buckets.map(function(b, bi){
+                return '<button class="gbtn" type="button" data-ii="' + ii + '" data-bi="' + bi + '">' + b + '</button>';
+              }).join("") + '<div class="gwhy" id="gw-' + ii + '"></div></div>';
+          }).join("");
+          html += '<div class="gdone" id="gdone" style="display:none">' + g.done + '</div></div>';
+          box.innerHTML = html;
+          var correct = 0, total = g.items.length;
+          var hint = g.hint || (g.buckets.length === 2
+            ? "Not quite — is it a recorded fact, or meaning that can change a decision?"
+            : "Not quite — what happened, what will happen, or what should we do?");
+          var btns = box.querySelectorAll(".gbtn");
+          for (var k = 0; k < btns.length; k++){
+            btns[k].addEventListener("click", function(){
+              var ii = parseInt(this.getAttribute("data-ii"), 10);
+              var bi = parseInt(this.getAttribute("data-bi"), 10);
+              var row = $("gi-" + ii);
+              if (row.classList.contains("ok")) return;
+              var it = g.items[ii];
+              if (bi === it.b){
+                row.classList.add("ok"); row.classList.remove("no");
+                $("gw-" + ii).textContent = "Right. " + it.why;
+                var rowBtns = row.querySelectorAll(".gbtn");
+                for (var m = 0; m < rowBtns.length; m++) rowBtns[m].disabled = true;
+                this.classList.add("sel");
+                correct++;
+                if (correct === total){
+                  state.gamesDone[doneKey] = true;
+                  $("gdone").style.display = "";
+                }
+              } else {
+                row.classList.add("no");
+                $("gw-" + ii).textContent = hint;
+              }
+            });
+          }
+        } else if (g.type === "build"){
+          html += g.groups.map(function(gr, gi){
+            return '<div class="ggroup" id="gg-' + gi + '"><strong>' + gr.label + '</strong>' +
+              gr.options.map(function(o, oi){
+                return '<button class="gbtn" type="button" data-gi="' + gi + '" data-oi="' + oi + '">' + o + '</button>';
+              }).join("") + '<div class="gwhy" id="gh-' + gi + '"></div></div>';
+          }).join("");
+          html += '<button class="btn btn-gold" id="gcheck" type="button">Check my sentence</button>' +
+            '<div class="gdone" id="gdone" style="display:none"></div></div>';
+          box.innerHTML = html;
+          var picks = {};
+          var gbtns = box.querySelectorAll(".gbtn");
+          for (var k2 = 0; k2 < gbtns.length; k2++){
+            gbtns[k2].addEventListener("click", function(){
+              var gi = parseInt(this.getAttribute("data-gi"), 10);
+              var oi = parseInt(this.getAttribute("data-oi"), 10);
+              picks[gi] = oi;
+              var grp = $("gg-" + gi);
+              var gb = grp.querySelectorAll(".gbtn");
+              for (var m2 = 0; m2 < gb.length; m2++) gb[m2].classList.remove("sel");
+              this.classList.add("sel");
+            });
+          }
+          $("gcheck").addEventListener("click", function(){
+            var allRight = true;
+            for (var gi2 = 0; gi2 < g.groups.length; gi2++){
+              var grp2 = $("gg-" + gi2);
+              if (picks[gi2] === undefined){ allRight = false; $("gh-" + gi2).textContent = "Pick one for this slot first."; continue; }
+              if (picks[gi2] === g.groups[gi2].a){ grp2.classList.add("ok"); $("gh-" + gi2).textContent = "Right."; }
+              else { grp2.classList.remove("ok"); allRight = false; $("gh-" + gi2).textContent = g.groups[gi2].hint; }
+            }
+            var dn = $("gdone");
+            if (allRight){
+              state.gamesDone[doneKey] = true;
+              dn.innerHTML = "<strong>" + g.sentence + "</strong><br>" + g.done;
+              dn.style.display = "";
+            } else {
+              dn.style.display = "none";
+            }
+          });
+        }
+      }
+      function gamesDoneCount(){
+        var done = 0;
+        for (var k in state.gamesDone){ if (k.indexOf("G" + state.current + "-") === 0) done++; }
+        return done;
+      }
+      function badgeShelfHTML(ep){
+        var perfect = state.score === ep.quiz.length;
+        var games = (ep.lessons || []).filter(function(L){ return !!L.game; }).length;
+        var gm = games > 0 && gamesDoneCount() >= games;
+        function chip(name, desc, got){
+          return '<span class="badge-chip ' + (got ? "got" : "miss") + '">' + (got ? "★ " : "☆ ") + name + '<small>' + desc + '</small></span>';
+        }
+        return '<div class="badge-shelf">' +
+          chip(ep.badge, "Clear this episode", true) +
+          chip("Perfect Run", "Score 3/3 on the checkpoint", perfect) +
+          (games > 0 ? chip("Game Master", "Finish all " + games + " games in this episode", gm) : "") +
+          '</div>';
+      }
+      function certRowHTML(){
+        return '<div class="cert-row"><label for="cert-input">Name for your certificate (optional): </label>' +
+          '<input id="cert-input" type="text" maxlength="60" placeholder="Your name" autocomplete="name">' +
+          '<button class="btn btn-gold" id="btn-cert" type="button">Print badge certificate (PDF)</button></div>';
+      }
+      function shelfHTML(ep){
+        if (!ep.shelf) return "";
+        var h = '<div class="shelf"><h4>Keep learning with Dr. K</h4><p class="snote">Optional — not graded, not on any test. Dr. K’s picks for the curious.</p>';
+        ep.shelf.forEach(function(s){
+          h += '<a href="' + s.url + '" target="_blank" rel="noopener"><span class="kind">' + (s.kind === "watch" ? "Watch" : "Read") + '</span><b>' + s.title + '</b><span>' + s.note + '</span></a>';
+        });
+        return h + '</div>';
+      }
+      function outroHTML(ep){
+        return ep.outro ? '<div class="drk-outro">' + ep.outro + '</div>' : "";
+      }
+      function openCert(ep){
+        var name = $("cert-input") ? $("cert-input").value.trim() : "";
+        $("cert-name").textContent = name || "A Disclosure Intelligence player";
+        $("cert-ep").textContent = "Episode " + ep.n + ": " + ep.title;
+        $("cert-badge").textContent = ep.badge;
+        $("cert-score").textContent = "Checkpoint: " + state.score + " / " + ep.quiz.length + " · Episode value: +" + epMaxXP(ep) + " XP";
+        var bonus = [];
+        if (state.score === ep.quiz.length) bonus.push("Perfect Run");
+        var games = (ep.lessons || []).filter(function(L){ return !!L.game; }).length;
+        if (games > 0 && gamesDoneCount() >= games) bonus.push("Game Master");
+        $("cert-bonus").textContent = bonus.length ? "Bonus badges: " + bonus.join(" · ") : "Bonus badges: none this run — replay the games and the checkpoint to earn them.";
+        $("cert-date").textContent = new Date().toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" });
+        $("cert-overlay").classList.add("open");
+      }
+      /* ---------- wiring ---------- */
+      $("btn-exit").addEventListener("click", exitPlayer);
+      $("btn-start").addEventListener("click", function(){
+        var firstOpen = EPISODES.findIndex(function(_, i){ return !state.cleared[i] && isUnlocked(i); });
+        if (firstOpen === -1) firstOpen = 0;
+        openEpisode(firstOpen);
+      });
+      var _pb = $("btn-cert-print"); if (_pb) _pb.addEventListener("click", function(){ window.print(); });
+      var _cb2 = $("btn-cert-close"); if (_cb2) _cb2.addEventListener("click", function(){ $("cert-overlay").classList.remove("open"); });
+      var _ov = $("cert-overlay"); if (_ov) _ov.addEventListener("click", function(e){ if (e.target === this) this.classList.remove("open"); });
+      document.addEventListener("keydown", function(e){ if (e.key === "Escape"){ var o = $("cert-overlay"); if (o) o.classList.remove("open"); } });
+      renderTrail();
+      updateHUD();
+    </script>
+
+      <script>
+      /* ============================================================
+         FDI INTERACTIVES — LM word-counter, FinBERT probability bar,
+         ADAM data / results visuals. Appended by build.py.
+         ============================================================ */
+      var FDI_WORDS = [
+        ["Strong","pos"],["demand","none"],["helped","none"],["sales","none"],["improve","pos"],
+        ["this","none"],["year,","none"],["and","none"],["efficient","pos"],["operations","none"],
+        ["delivered","none"],["a","none"],["clear","none"],["benefit","pos"],["to","none"],
+        ["shareholders.","none"],["Management","none"],["expects","none"],["continued","none"],["success","pos"],
+        ["from","none"],["new","none"],["products.","none"],["However,","none"],["revenue","none"],
+        ["faced","none"],["a","none"],["decline","neg"],["in","none"],["one","none"],
+        ["segment,","none"],["a","none"],["loss","neg"],["on","none"],["discontinued","none"],
+        ["operations,","none"],["and","none"],["higher","none"],["risk","neg"],["from","none"],
+        ["volatility,","neg"],["leaving","none"],["the","none"],["outlook","none"],["weak","neg"],
+        ["and","none"],["a","none"],["burden","neg"],["on","none"],["margins.","none"]
+      ];
+      function FDI_lmCounter(){
+        var chips = FDI_WORDS.map(function(w, i){
+          return '<button type="button" class="lmw" data-cls="' + w[1] + '" onclick="FDI_lmToggle(this)">' + w[0] + '</button>';
+        }).join(" ");
+        return '<div class="viz" role="group" aria-label="LM word counter">' +
+          '<p style="margin-top:0"><strong>Try it yourself:</strong> click every word you think is on an LM list — Positive or Negative. The counts and scores recompute live. Words on neither list are marked, not counted.</p>' +
+          '<div>' + chips + '</div>' +
+          '<div class="fdi-score" id="fdi-lm-score">Positive: <b>0</b> &nbsp;·&nbsp; Negative: <b>0</b><br>%Pos: <b>0.0%</b> &nbsp;·&nbsp; %Neg: <b>0.0%</b><br>Net LM tone: <b>0.00</b> &nbsp;·&nbsp; Net per 1,000 words: <b>0</b></div>' +
+          '<p class="fdi-note" id="fdi-lm-note">Total words: 50. Click words to score the passage.</p>' +
+          '<div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">' +
+          '<button type="button" class="btn btn-gold" onclick="FDI_lmReveal()">Reveal the answer</button>' +
+          '<button type="button" class="btn btn-ghost" onclick="FDI_lmReset()">Reset</button></div></div>';
+      }
+      function FDI_lmScore(){
+        var box = document.getElementById("fdi-lm-score"); if (!box) return;
+        var pos = 0, neg = 0, wrong = 0;
+        var chips = document.querySelectorAll("#p-stage .lmw");
+        for (var i = 0; i < chips.length; i++){
+          var c = chips[i];
+          if (c.classList.contains("sel-pos")) pos++;
+          else if (c.classList.contains("sel-neg")) neg++;
+          else if (c.classList.contains("sel-none")) wrong++;
+        }
+        var pct = function(x){ return (x / 50 * 100).toFixed(1) + "%"; };
+        var net = ((pos - neg) / 50);
+        var netTxt = (net > 0 ? "+" : "") + net.toFixed(2);
+        var per1k = Math.round((pos - neg) / 50 * 1000);
+        box.innerHTML = "Positive: <b>" + pos + "</b> &nbsp;·&nbsp; Negative: <b>" + neg + "</b><br>" +
+          "%Pos: <b>" + pct(pos) + "</b> &nbsp;·&nbsp; %Neg: <b>" + pct(neg) + "</b><br>" +
+          "Net LM tone: <b>" + netTxt + "</b> &nbsp;·&nbsp; Net per 1,000 words: <b>" + (per1k > 0 ? "+" : "") + per1k + "</b>";
+        var note = document.getElementById("fdi-lm-note");
+        if (note){
+          if (pos === 5 && neg === 6 && wrong === 0) note.textContent = "Exactly right: 5 positive, 6 negative — net LM tone −0.02 (−2.0%), −20 per 1,000 words.";
+          else if (wrong > 0) note.textContent = "Careful: the struck-through words are on neither LM list — a dictionary would not count them.";
+          else note.textContent = "Total words: 50. The lesson answer is 5 positive and 6 negative.";
+        }
+      }
+      function FDI_lmToggle(btn){
+        if (btn.disabled) return;
+        var cls = btn.getAttribute("data-cls");
+        if (btn.classList.contains("sel-pos") || btn.classList.contains("sel-neg") || btn.classList.contains("sel-none")){
+          btn.classList.remove("sel-pos"); btn.classList.remove("sel-neg"); btn.classList.remove("sel-none");
+        } else if (cls === "pos"){ btn.classList.add("sel-pos"); }
+        else if (cls === "neg"){ btn.classList.add("sel-neg"); }
+        else { btn.classList.add("sel-none"); }
+        FDI_lmScore();
+      }
+      function FDI_lmReveal(){
+        var chips = document.querySelectorAll("#p-stage .lmw");
+        for (var i = 0; i < chips.length; i++){
+          var c = chips[i], cls = c.getAttribute("data-cls");
+          c.classList.remove("sel-pos"); c.classList.remove("sel-neg"); c.classList.remove("sel-none");
+          if (cls === "pos") c.classList.add("sel-pos");
+          else if (cls === "neg") c.classList.add("sel-neg");
+        }
+        FDI_lmScore();
+      }
+      function FDI_lmReset(){
+        var chips = document.querySelectorAll("#p-stage .lmw");
+        for (var i = 0; i < chips.length; i++){
+          chips[i].classList.remove("sel-pos"); chips[i].classList.remove("sel-neg"); chips[i].classList.remove("sel-none");
+        }
+        FDI_lmScore();
+      }
+      function FDI_finbertBar(){
+        return '<div class="viz" role="group" aria-label="FinBERT probability bar">' +
+          '<p style="margin-top:0"><strong>Move the sliders</strong> to explore FinBERT\u2019s output. The three numbers are normalized to sum to 1.00, the predicted class is the argmax, and the confidence is the max probability. Illustrative — not a live model run.</p>' +
+          '<div class="fb-row"><label for="fdi-fb-n">Negative</label><input type="range" id="fdi-fb-n" min="0" max="100" value="62" oninput="FDI_fbUpdate()"><output id="fdi-fb-nv">0.62</output></div>' +
+          '<div class="fb-bar neg"><i id="fdi-fb-nb" style="width:62%"></i></div>' +
+          '<div class="fb-row"><label for="fdi-fb-u">Neutral</label><input type="range" id="fdi-fb-u" min="0" max="100" value="30" oninput="FDI_fbUpdate()"><output id="fdi-fb-uv">0.30</output></div>' +
+          '<div class="fb-bar"><i id="fdi-fb-ub" style="width:30%"></i></div>' +
+          '<div class="fb-row"><label for="fdi-fb-p">Positive</label><input type="range" id="fdi-fb-p" min="0" max="100" value="8" oninput="FDI_fbUpdate()"><output id="fdi-fb-pv">0.08</output></div>' +
+          '<div class="fb-bar pos"><i id="fdi-fb-pb" style="width:8%"></i></div>' +
+          '<div class="fdi-score" id="fdi-fb-score">P(Negative) = <b>0.62</b> &nbsp;·&nbsp; P(Neutral) = <b>0.30</b> &nbsp;·&nbsp; P(Positive) = <b>0.08</b> (sum 1.00)<br>Predicted class (argmax): <b>Negative</b> &nbsp;·&nbsp; Confidence (max probability): <b>0.62</b></div>' +
+          '<div class="fb-verdict review" id="fdi-fb-verdict">Routes to human review — confidence 0.62 is below ADAM’s 0.80 review threshold.</div></div>';
+      }
+      function FDI_fbUpdate(){
+        var n = document.getElementById("fdi-fb-n"), u = document.getElementById("fdi-fb-u"), p = document.getElementById("fdi-fb-p");
+        if (!n || !u || !p) return;
+        var rn = +n.value, ru = +u.value, rp = +p.value, s = rn + ru + rp;
+        var pn, pu, pp;
+        if (s === 0){ pn = pu = pp = 1 / 3; } else { pn = rn / s; pu = ru / s; pp = rp / s; }
+        var f2 = function(x){ return x.toFixed(2); };
+        document.getElementById("fdi-fb-nv").textContent = f2(pn);
+        document.getElementById("fdi-fb-uv").textContent = f2(pu);
+        document.getElementById("fdi-fb-pv").textContent = f2(pp);
+        document.getElementById("fdi-fb-nb").style.width = (pn * 100).toFixed(1) + "%";
+        document.getElementById("fdi-fb-ub").style.width = (pu * 100).toFixed(1) + "%";
+        document.getElementById("fdi-fb-pb").style.width = (pp * 100).toFixed(1) + "%";
+        var cls = "Negative", conf = pn;
+        if (pu > conf){ cls = "Neutral"; conf = pu; }
+        if (pp > conf){ cls = "Positive"; conf = pp; }
+        document.getElementById("fdi-fb-score").innerHTML =
+          "P(Negative) = <b>" + f2(pn) + "</b> &nbsp;·&nbsp; P(Neutral) = <b>" + f2(pu) + "</b> &nbsp;·&nbsp; P(Positive) = <b>" + f2(pp) + "</b> (sum 1.00)<br>" +
+          "Predicted class (argmax): <b>" + cls + "</b> &nbsp;·&nbsp; Confidence (max probability): <b>" + f2(conf) + "</b>";
+        var v = document.getElementById("fdi-fb-verdict");
+        if (conf >= 0.80){ v.className = "fb-verdict"; v.textContent = "Automated — confidence " + f2(conf) + " is at or above ADAM\u2019s 0.80 review threshold."; }
+        else { v.className = "fb-verdict review"; v.textContent = "Routes to human review — confidence " + f2(conf) + " is below ADAM\u2019s 0.80 review threshold."; }
+      }
+      function FDI_adamData(){
+        return '<div class="viz-stats">' +
+          '<div class="viz-stat"><b>55</b><span>firms · 5 per GICS sector</span></div>' +
+          '<div class="viz-stat"><b>11</b><span>GICS sectors</span></div>' +
+          '<div class="viz-stat"><b>550</b><span>firm-year 10-Ks · 2016–2025</span></div>' +
+          '<div class="viz-stat"><b>179,623</b><span>focal paragraphs</span></div></div>' +
+          '<p class="fdi-note">94,031 from Item 1A + 85,592 from Item 7 = 179,623. Another 32,407 paragraphs (2014–2015) serve only as historical context.</p>';
+      }
+      function FDI_adamResults(){
+        return '<div><span class="fdi-prelim">PRELIMINARY — VALIDATION ONGOING</span>' +
+          '<table class="fdi-table"><tr><th>Method</th><th>Sentiment accuracy</th><th>Macro-F1</th></tr>' +
+          '<tr><td>LM dictionary</td><td>37.3%</td><td>0.320</td></tr>' +
+          '<tr><td>FinBERT</td><td>60.7%</td><td>0.529</td></tr>' +
+          '<tr><td>LM–FinBERT ensemble</td><td>58.7%</td><td>0.384</td></tr>' +
+          '<tr class="hl"><td>ADAM (current)</td><td>82.7%</td><td>0.745</td></tr></table>' +
+          '<p class="fdi-note">Economic direction (ADAM): 83.3% accuracy, macro-F1 0.689. Disclosure informativeness (ADAM): 71.4% accuracy, macro-F1 0.607. Evaluated on the 300-paragraph human reference set; confirmatory testing still to come.</p></div>';
+      }
+      function FDI_adamDecision(){
+        return '<div><span class="fdi-prelim">PRELIMINARY — VALIDATION ONGOING</span>' +
+          '<table class="fdi-table"><tr><th>On the 162 paragraphs where LM ≠ FinBERT (54%)</th><th>Accuracy</th><th>Macro-F1</th></tr>' +
+          '<tr><td>LM dictionary</td><td>25.3%</td><td>—</td></tr>' +
+          '<tr><td>FinBERT</td><td>68.5%</td><td>0.606</td></tr>' +
+          '<tr><td>LM–FinBERT ensemble</td><td>64.8%</td><td>—</td></tr>' +
+          '<tr class="hl"><td>ADAM</td><td>76.5%</td><td>0.703</td></tr></table>' +
+          '<p class="fdi-note">Where both base models were wrong (77 paragraphs), ADAM is correct on 89.6%. Decision support: High-informativeness flag 81.0% precision / 69.9% recall vs the FinBERT-negative rule at 19.5% precision. Confidence below 0.80 routes 56% to review, captures 92.3% of errors, and accuracy on the automated remainder is 97.0%.</p></div>';
+      }
+      function FDI_adamAblation(){
+        return '<div><span class="fdi-prelim">PRELIMINARY — VALIDATION ONGOING</span>' +
+          '<table class="fdi-table"><tr><th>Configuration (same adjudicator)</th><th>Sentiment</th><th>Direction</th><th>Informativeness</th></tr>' +
+          '<tr><td>Judge-only (paragraph only)</td><td>82.0% / .731</td><td>84.0% / .683</td><td>67.2% / .453</td></tr>' +
+          '<tr><td>Base evidence (+ LM + FinBERT)</td><td>82.0% / .730</td><td>83.7% / .694</td><td>68.3% / .469</td></tr>' +
+          '<tr class="hl"><td>Full ADAM (+ Context &amp; Quality)</td><td>82.7% / .745</td><td>83.3% / .689</td><td>71.4% / .607</td></tr></table>' +
+          '<p class="fdi-note">Accuracy / macro-F1. Informativeness ΔF1: +.138 vs Base, +.154 vs Judge-only — both statistically significant. But note the honest boundary: Judge-only already reaches 82.0% on sentiment and 84.0% on direction, slightly above Full ADAM\u2019s 83.3% — the architecture\u2019s proven gain is informativeness.</p></div>';
+      }
+    </script>
+  </body>
+</html>
